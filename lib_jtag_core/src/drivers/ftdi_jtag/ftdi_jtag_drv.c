@@ -42,7 +42,8 @@
 #include "../../os_interface/os_interface.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #include "ftdi/ftd2xx.h"
@@ -65,23 +66,22 @@ typedef struct _drv_desc
 	char drv_desc[128];
 	int id;
 	int ftdi_index;
-}drv_desc;
+} drv_desc;
 
 #define PROBE_GENERIC_FTDI 0
 
 #define MAX_PROBES_FTDI 8
 
-static drv_desc subdrv_list[MAX_PROBES_FTDI]=
-{
-	{"USB_GENERIC_FTDI_PROBE","GENERIC USB FTDI PROBE",PROBE_GENERIC_FTDI,0},
-	{"USB_GENERIC_FTDI_PROBE","GENERIC USB FTDI PROBE",PROBE_GENERIC_FTDI,0},
-	{"USB_GENERIC_FTDI_PROBE","GENERIC USB FTDI PROBE",PROBE_GENERIC_FTDI,0},
-	{"USB_GENERIC_FTDI_PROBE","GENERIC USB FTDI PROBE",PROBE_GENERIC_FTDI,0},
-	{"USB_GENERIC_FTDI_PROBE","GENERIC USB FTDI PROBE",PROBE_GENERIC_FTDI,0},
-	{"USB_GENERIC_FTDI_PROBE","GENERIC USB FTDI PROBE",PROBE_GENERIC_FTDI,0},
-	{"USB_GENERIC_FTDI_PROBE","GENERIC USB FTDI PROBE",PROBE_GENERIC_FTDI,0},
-	{"USB_GENERIC_FTDI_PROBE","GENERIC USB FTDI PROBE",PROBE_GENERIC_FTDI,0}
-};
+static drv_desc subdrv_list[MAX_PROBES_FTDI] =
+	{
+		{"USB_GENERIC_FTDI_PROBE", "GENERIC USB FTDI PROBE", PROBE_GENERIC_FTDI, 0},
+		{"USB_GENERIC_FTDI_PROBE", "GENERIC USB FTDI PROBE", PROBE_GENERIC_FTDI, 0},
+		{"USB_GENERIC_FTDI_PROBE", "GENERIC USB FTDI PROBE", PROBE_GENERIC_FTDI, 0},
+		{"USB_GENERIC_FTDI_PROBE", "GENERIC USB FTDI PROBE", PROBE_GENERIC_FTDI, 0},
+		{"USB_GENERIC_FTDI_PROBE", "GENERIC USB FTDI PROBE", PROBE_GENERIC_FTDI, 0},
+		{"USB_GENERIC_FTDI_PROBE", "GENERIC USB FTDI PROBE", PROBE_GENERIC_FTDI, 0},
+		{"USB_GENERIC_FTDI_PROBE", "GENERIC USB FTDI PROBE", PROBE_GENERIC_FTDI, 0},
+		{"USB_GENERIC_FTDI_PROBE", "GENERIC USB FTDI PROBE", PROBE_GENERIC_FTDI, 0}};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Command Processor for MPSSE and MCU Host Bus Emulation Modes
@@ -101,19 +101,19 @@ static drv_desc subdrv_list[MAX_PROBES_FTDI]=
 // Clock Data Bytes Out on +ve clock edge MSB first (no read)
 // 0x10, LengthL, LengthH, [Byte1..Byte65536 (max)]
 
-#define OP_WR_TMS     (0x1 << 6)
-#define OP_RD_TDO     (0x1 << 5)
-#define OP_WR_TDI     (0x1 << 4)
-#define OP_LSB_FIRST  (0x1 << 3)
-#define OP_FEDGE_RD   (0x1 << 2)
-#define OP_BIT_MODE   (0x1 << 1)
-#define OP_FEDGE_WR   (0x1 << 0)
+#define OP_WR_TMS (0x1 << 6)
+#define OP_RD_TDO (0x1 << 5)
+#define OP_WR_TDI (0x1 << 4)
+#define OP_LSB_FIRST (0x1 << 3)
+#define OP_FEDGE_RD (0x1 << 2)
+#define OP_BIT_MODE (0x1 << 1)
+#define OP_FEDGE_WR (0x1 << 0)
 
-#define CMD_ENABLE_LOOPBACK   0x84
-#define CMD_DISABLE_LOOPBACK  0x85
-#define CMD_SET_DIVISOR       0x86 // +0xValueL, 0xValueH
-#define CMD_WAIT_IO_HIGH      0x88
-#define CMD_WAIT_IO_LOW       0x89
+#define CMD_ENABLE_LOOPBACK 0x84
+#define CMD_DISABLE_LOOPBACK 0x85
+#define CMD_SET_DIVISOR 0x86 // +0xValueL, 0xValueH
+#define CMD_WAIT_IO_HIGH 0x88
+#define CMD_WAIT_IO_LOW 0x89
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -139,38 +139,36 @@ unsigned char ftdi_in_buf[64 * 1024];
 
 #if !defined(WIN32)
 
-int Sleep( unsigned int timeout_ms )
+int Sleep(unsigned int timeout_ms)
 {
 	struct timeval tv;
-	tv.tv_sec = timeout_ms/1000;
-	tv.tv_usec = (timeout_ms%1000) * 1000;
+	tv.tv_sec = timeout_ms / 1000;
+	tv.tv_usec = (timeout_ms % 1000) * 1000;
 	select(0, NULL, NULL, NULL, &tv);
 
 	return 0;
 }
 #endif
 
-
-
 #if !defined(FTDILIB)
 
-typedef FT_STATUS(WINAPI * FT_OPEN)(DWORD deviceNumber, FT_HANDLE *pHandle);
-typedef FT_STATUS(WINAPI * FT_OPENEX)(PVOID pArg1, DWORD Flags, FT_HANDLE *pHandle);
-typedef FT_STATUS(WINAPI * FT_READ)(FT_HANDLE ftHandle, LPVOID lpBuffer, DWORD nBufferSize, LPDWORD lpBytesReturned);
-typedef FT_STATUS(WINAPI * FT_WRITE)(FT_HANDLE ftHandle, LPVOID lpBuffer, DWORD nBufferSize, LPDWORD lpBytesWritten);
-typedef FT_STATUS(WINAPI * FT_GETSTATUS)(FT_HANDLE ftHandle, DWORD *dwRxBytes, DWORD *dwTxBytes, DWORD *dwEventDWord);
-typedef FT_STATUS(WINAPI * FT_PURGE)(FT_HANDLE ftHandle, ULONG Mask);
-typedef FT_STATUS(WINAPI * FT_SETUSBPARAMETERS)(FT_HANDLE ftHandle, ULONG ulInTransferSize, ULONG ulOutTransferSize);
-typedef FT_STATUS(WINAPI * FT_SETLATENCYTIMER)(FT_HANDLE ftHandle, UCHAR ucLatency);
-typedef FT_STATUS(WINAPI * FT_SETEVENTNOTIFICATION)(FT_HANDLE ftHandle, DWORD dwEventMask, PVOID pvArg);
-typedef FT_STATUS(WINAPI * FT_CLOSE)(FT_HANDLE ftHandle);
-typedef FT_STATUS(WINAPI * FT_LISTDEVICES)(LPVOID pArg1, LPVOID pArg2, DWORD Flags);
-typedef FT_STATUS(WINAPI * FT_SETBITMODE)(FT_HANDLE ftHandle, UCHAR ucMask, UCHAR ucEnable);
-typedef FT_STATUS(WINAPI * FT_SETTIMEOUTS)(FT_HANDLE ftHandle, ULONG ReadTimeout, ULONG WriteTimeout);
-typedef FT_STATUS(WINAPI * FT_GETQUEUESTATUS)(FT_HANDLE ftHandle, DWORD *dwRxBytes);
-typedef FT_STATUS(WINAPI * FT_GETDEVICEINFO)(FT_HANDLE ftHandle, FT_DEVICE *lpftDevice, LPDWORD lpdwID, PCHAR SerialNumber, PCHAR Description, LPVOID Dummy);
-typedef FT_STATUS(WINAPI * FT_RESETDEVICE)(FT_HANDLE ftHandle);
-typedef FT_STATUS(WINAPI * FT_SETCHARS)(FT_HANDLE ftHandle, UCHAR EventChar, UCHAR EventCharEnabled, UCHAR ErrorChar, UCHAR ErrorCharEnabled);
+typedef FT_STATUS(WINAPI *FT_OPEN)(DWORD deviceNumber, FT_HANDLE *pHandle);
+typedef FT_STATUS(WINAPI *FT_OPENEX)(PVOID pArg1, DWORD Flags, FT_HANDLE *pHandle);
+typedef FT_STATUS(WINAPI *FT_READ)(FT_HANDLE ftHandle, LPVOID lpBuffer, DWORD nBufferSize, LPDWORD lpBytesReturned);
+typedef FT_STATUS(WINAPI *FT_WRITE)(FT_HANDLE ftHandle, LPVOID lpBuffer, DWORD nBufferSize, LPDWORD lpBytesWritten);
+typedef FT_STATUS(WINAPI *FT_GETSTATUS)(FT_HANDLE ftHandle, DWORD *dwRxBytes, DWORD *dwTxBytes, DWORD *dwEventDWord);
+typedef FT_STATUS(WINAPI *FT_PURGE)(FT_HANDLE ftHandle, ULONG Mask);
+typedef FT_STATUS(WINAPI *FT_SETUSBPARAMETERS)(FT_HANDLE ftHandle, ULONG ulInTransferSize, ULONG ulOutTransferSize);
+typedef FT_STATUS(WINAPI *FT_SETLATENCYTIMER)(FT_HANDLE ftHandle, UCHAR ucLatency);
+typedef FT_STATUS(WINAPI *FT_SETEVENTNOTIFICATION)(FT_HANDLE ftHandle, DWORD dwEventMask, PVOID pvArg);
+typedef FT_STATUS(WINAPI *FT_CLOSE)(FT_HANDLE ftHandle);
+typedef FT_STATUS(WINAPI *FT_LISTDEVICES)(LPVOID pArg1, LPVOID pArg2, DWORD Flags);
+typedef FT_STATUS(WINAPI *FT_SETBITMODE)(FT_HANDLE ftHandle, UCHAR ucMask, UCHAR ucEnable);
+typedef FT_STATUS(WINAPI *FT_SETTIMEOUTS)(FT_HANDLE ftHandle, ULONG ReadTimeout, ULONG WriteTimeout);
+typedef FT_STATUS(WINAPI *FT_GETQUEUESTATUS)(FT_HANDLE ftHandle, DWORD *dwRxBytes);
+typedef FT_STATUS(WINAPI *FT_GETDEVICEINFO)(FT_HANDLE ftHandle, FT_DEVICE *lpftDevice, LPDWORD lpdwID, PCHAR SerialNumber, PCHAR Description, LPVOID Dummy);
+typedef FT_STATUS(WINAPI *FT_RESETDEVICE)(FT_HANDLE ftHandle);
+typedef FT_STATUS(WINAPI *FT_SETCHARS)(FT_HANDLE ftHandle, UCHAR EventChar, UCHAR EventCharEnabled, UCHAR ErrorChar, UCHAR ErrorCharEnabled);
 
 FT_OPEN pFT_Open;
 FT_OPENEX pFT_OpenEx;
@@ -192,9 +190,7 @@ FT_SETCHARS pFT_SetChars;
 
 #else
 
-
 #endif
-
 
 static int ft2232_set_data_bits_low_byte(unsigned char value, unsigned char direction)
 {
@@ -202,12 +198,13 @@ static int ft2232_set_data_bits_low_byte(unsigned char value, unsigned char dire
 	DWORD dw_bytes_written = 0;
 	unsigned char buf[3];
 
-	buf[0] = 0x80;      // command "set data bits low byte"
-	buf[1] = value;     // value
+	buf[0] = 0x80;		// command "set data bits low byte"
+	buf[1] = value;		// value
 	buf[2] = direction; // direction
 
 	status = pFT_Write(ftdih, buf, sizeof(buf), &dw_bytes_written);
-	if ( (status != FT_OK) || (dw_bytes_written != sizeof(buf) ) ) {
+	if ((status != FT_OK) || (dw_bytes_written != sizeof(buf)))
+	{
 		return -1;
 	}
 
@@ -220,12 +217,13 @@ static int ft2232_set_data_bits_high_byte(unsigned char value, unsigned char dir
 	DWORD dw_bytes_written = 0;
 	unsigned char buf[3];
 
-	buf[0] = 0x82;      // command "set data bits high byte"
-	buf[1] = value;     // value
+	buf[0] = 0x82;		// command "set data bits high byte"
+	buf[1] = value;		// value
 	buf[2] = direction; // direction
 
 	status = pFT_Write(ftdih, buf, sizeof(buf), &dw_bytes_written);
-	if ( (status != FT_OK) || ( dw_bytes_written != sizeof(buf) ) ) {
+	if ((status != FT_OK) || (dw_bytes_written != sizeof(buf)))
+	{
 		return -1;
 	}
 
@@ -241,20 +239,21 @@ static int ft2232h_enable_rtck(int enable)
 	buf = enable ? 0x96 : 0x97;
 
 	status = pFT_Write(ftdih, &buf, sizeof(buf), &dw_bytes_written);
-	if ( (status != FT_OK) || ( dw_bytes_written != sizeof(buf) ) ) {
+	if ((status != FT_OK) || (dw_bytes_written != sizeof(buf)))
+	{
 		return -1;
 	}
 
 	return 0;
 }
 
-int drv_FTDI_Detect(jtag_core * jc)
+int drv_FTDI_Detect(jtag_core *jc)
 {
-	int numDevs,i;
+	int numDevs, i;
 	FT_STATUS status;
 	char SerialNumber[512];
 
-	if(lib_handle == NULL)
+	if (lib_handle == NULL)
 		lib_handle = LoadLibrary("ftd2xx.dll");
 
 	if (lib_handle)
@@ -266,70 +265,70 @@ int drv_FTDI_Detect(jtag_core * jc)
 		status = pFT_ListDevices(&numDevs, NULL, FT_LIST_NUMBER_ONLY);
 		if (status != FT_OK && !numDevs)
 		{
-			jtagcore_logs_printf(jc,MSG_ERROR,"pFT_ListDevices : Error %x !\r\n",status);
+			jtagcore_logs_printf(jc, MSG_ERROR, "pFT_ListDevices : Error %x !\r\n", status);
 			return 0;
 		}
 
 		i = 0;
-		while( i<numDevs && i<MAX_PROBES_FTDI )
+		while (i < numDevs && i < MAX_PROBES_FTDI)
 		{
 			status = pFT_ListDevices((LPVOID)(MACH_WORD)i, SerialNumber, FT_LIST_BY_INDEX | FT_OPEN_BY_DESCRIPTION);
 			if (status != FT_OK)
 			{
-				jtagcore_logs_printf(jc,MSG_ERROR,"pFT_ListDevices : Error %x !\r\n",status);
+				jtagcore_logs_printf(jc, MSG_ERROR, "pFT_ListDevices : Error %x !\r\n", status);
 				return 0;
 			}
 
-			strcpy(subdrv_list[i].drv_id,SerialNumber);
-			strcpy(subdrv_list[i].drv_desc,SerialNumber);
-			strcat(subdrv_list[i].drv_desc," ");
+			strcpy(subdrv_list[i].drv_id, SerialNumber);
+			strcpy(subdrv_list[i].drv_desc, SerialNumber);
+			strcat(subdrv_list[i].drv_desc, " ");
 
 			status = pFT_ListDevices((LPVOID)(MACH_WORD)i, SerialNumber, FT_LIST_BY_INDEX | FT_OPEN_BY_SERIAL_NUMBER);
 			if (status != FT_OK)
 			{
-				jtagcore_logs_printf(jc,MSG_ERROR,"pFT_ListDevices : Error %x !\r\n",status);
+				jtagcore_logs_printf(jc, MSG_ERROR, "pFT_ListDevices : Error %x !\r\n", status);
 				return 0;
 			}
 
-			strcat(subdrv_list[i].drv_desc,SerialNumber);
+			strcat(subdrv_list[i].drv_desc, SerialNumber);
 
 			i++;
 		}
 
-		jtagcore_logs_printf( jc, MSG_INFO_1, "drv_FTDI_Detect : %d interface(s) found !\r\n", numDevs );
+		jtagcore_logs_printf(jc, MSG_INFO_1, "drv_FTDI_Detect : %d interface(s) found !\r\n", numDevs);
 
 		return numDevs;
 	}
 	else
 	{
-		jtagcore_logs_printf( jc, MSG_INFO_1, "drv_FTDI_Detect : ftd2xx.dll not found !\r\n" );
+		jtagcore_logs_printf(jc, MSG_INFO_1, "drv_FTDI_Detect : ftd2xx.dll not found !\r\n");
 	}
 
 	return 0;
 }
 
-void update_gpio_state(int index,int state)
+void update_gpio_state(int index, int state)
 {
-	if( index >=0 )
+	if (index >= 0)
 	{
-		if(index < 8)
+		if (index < 8)
 		{
-			if(state)
-				low_output |= (0x01<<index);
+			if (state)
+				low_output |= (0x01 << index);
 			else
-				low_output &= ~(0x01<<index);
+				low_output &= ~(0x01 << index);
 		}
 		else
 		{
-			if(state)
-				high_output |= (0x01<<(index - 8));
+			if (state)
+				high_output |= (0x01 << (index - 8));
 			else
-				high_output &= ~(0x01<<(index - 8));
+				high_output &= ~(0x01 << (index - 8));
 		}
 	}
 }
 
-int drv_FTDI_Init(jtag_core * jc, int sub_drv, char * params)
+int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 {
 	FT_STATUS status;
 	DWORD deviceID;
@@ -339,12 +338,12 @@ int drv_FTDI_Init(jtag_core * jc, int sub_drv, char * params)
 	int numDevs;
 	int baseclock, divisor, tckfreq;
 	DWORD devIndex;
-	DWORD nbRead,nbtosend;
+	DWORD nbRead, nbtosend;
 	int i;
 
-	#ifdef WIN32
+#ifdef WIN32
 
-	if(lib_handle == NULL)
+	if (lib_handle == NULL)
 		lib_handle = LoadLibrary("ftd2xx.dll");
 
 	if (lib_handle)
@@ -419,18 +418,18 @@ int drv_FTDI_Init(jtag_core * jc, int sub_drv, char * params)
 	}
 	else
 	{
-		jtagcore_logs_printf(jc,MSG_ERROR,"drv_FTDI_Init : Can't open ftd2xx.dll !\r\n");
+		jtagcore_logs_printf(jc, MSG_ERROR, "drv_FTDI_Init : Can't open ftd2xx.dll !\r\n");
 		return -1;
 	}
-	#else
-		// TODO : Linux lib loader.
-		return -1;
-	#endif
+#else
+	// TODO : Linux lib loader.
+	return -1;
+#endif
 
 	status = pFT_ListDevices(&numDevs, NULL, FT_LIST_NUMBER_ONLY);
 	if (status != FT_OK && !numDevs)
 	{
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_ListDevices : Error %x !\r\n",status);
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_ListDevices : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
@@ -438,84 +437,94 @@ int drv_FTDI_Init(jtag_core * jc, int sub_drv, char * params)
 	status = pFT_ListDevices((LPVOID)(MACH_WORD)devIndex, SerialNumber, FT_LIST_BY_INDEX | FT_OPEN_BY_SERIAL_NUMBER);
 	if (status != FT_OK)
 	{
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_ListDevices : Error %x !\r\n",status);
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_ListDevices : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
 	status = pFT_OpenEx(SerialNumber, FT_OPEN_BY_SERIAL_NUMBER, &ftdih);
 	if (status != FT_OK)
 	{
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_OpenEx : Error %x !\r\n",status);
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_OpenEx : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
 	status = pFT_ResetDevice(ftdih);
-	if (status != FT_OK) {
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_ResetDevice : Error %x !\r\n",status);
+	if (status != FT_OK)
+	{
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_ResetDevice : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
 	status = pFT_GetQueueStatus(ftdih, &nbRead);
-	if (status != FT_OK) {
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_GetQueueStatus : Error %x !\r\n",status);
+	if (status != FT_OK)
+	{
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_GetQueueStatus : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
-	if ( nbRead > 0)
+	if (nbRead > 0)
 		pFT_Read(ftdih, &ftdi_in_buf, nbRead, &nbRead);
 
-	//Set USB request transfer sizes to 64K
+	// Set USB request transfer sizes to 64K
 	status = pFT_SetUSBParameters(ftdih, 65536, 65535);
-	if (status != FT_OK) {
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_SetUSBParameters : Error %x !\r\n",status);
+	if (status != FT_OK)
+	{
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_SetUSBParameters : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
-	//Disable event and error characters
+	// Disable event and error characters
 	status = pFT_SetChars(ftdih, 0, 0, 0, 0);
-	if (status != FT_OK) {
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_SetChars : Error %x !\r\n",status);
+	if (status != FT_OK)
+	{
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_SetChars : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
-	//Sets the read and write timeouts in milliseconds
+	// Sets the read and write timeouts in milliseconds
 	status = pFT_SetTimeouts(ftdih, 5000, 5000);
-	if (status != FT_OK) {
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_SetTimeouts : Error %x !\r\n",status);
+	if (status != FT_OK)
+	{
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_SetTimeouts : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
-	//Set the latency timer (default is 16mS)
+	// Set the latency timer (default is 16mS)
 	status = pFT_SetLatencyTimer(ftdih, 2);
-	if (status != FT_OK) {
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_SetLatencyTimer : Error %x !\r\n",status);
+	if (status != FT_OK)
+	{
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_SetLatencyTimer : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
-	//Reset controller
+	// Reset controller
 	status = pFT_SetBitMode(ftdih, 0x0, 0x00);
-	if (status != FT_OK) {
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_SetBitMode : Error %x !\r\n",status);
+	if (status != FT_OK)
+	{
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_SetBitMode : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
-	//Enable MPSSE mode
+	// Enable MPSSE mode
 	status = pFT_SetBitMode(ftdih, 0x0, 0x02);
-	if (status != FT_OK) {
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_SetBitMode : Error %x !\r\n",status);
+	if (status != FT_OK)
+	{
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_SetBitMode : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
 	status = pFT_SetBitMode(ftdih, 0x0b, 2);
-	if (status != FT_OK) {
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_SetBitMode : Error %x !\r\n",status);
+	if (status != FT_OK)
+	{
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_SetBitMode : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
 	status = pFT_GetDeviceInfo(ftdih, &ftdi_device, &deviceID,
-		SerialNumber, Description, NULL);
-	if (status != FT_OK) {
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_GetDeviceInfo : Error %x !\r\n",status);
+							   SerialNumber, Description, NULL);
+	if (status != FT_OK)
+	{
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_GetDeviceInfo : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
@@ -539,108 +548,110 @@ int drv_FTDI_Init(jtag_core * jc, int sub_drv, char * params)
 	*/
 
 	low_direction = 0x00;
-	for(i=0;i<8;i++)
+	for (i = 0; i < 8; i++)
 	{
-		sprintf(tmp_str,"PROBE_FTDI_SET_PIN_DIR_ADBUS%d",i);
-		if( jtagcore_getEnvVarValue( jc, tmp_str) > 0 )
+		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DIR_ADBUS%d", i);
+		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
 		{
-			low_direction |= (0x01<<i);
+			low_direction |= (0x01 << i);
 		}
 	}
 
 	low_output = 0x00;
-	for(i=0;i<8;i++)
+	for (i = 0; i < 8; i++)
 	{
-		sprintf(tmp_str,"PROBE_FTDI_SET_PIN_DEFAULT_STATE_ADBUS%d",i);
-		if( jtagcore_getEnvVarValue( jc, tmp_str) > 0 )
+		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DEFAULT_STATE_ADBUS%d", i);
+		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
 		{
-			low_output |= (0x01<<i);
+			low_output |= (0x01 << i);
 		}
 	}
 
 	low_polarity = 0;
-	for(i=0;i<8;i++)
+	for (i = 0; i < 8; i++)
 	{
-		sprintf(tmp_str,"PROBE_FTDI_SET_PIN_POLARITY_ADBUS%d",i);
-		if( jtagcore_getEnvVarValue( jc, tmp_str) > 0 )
+		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_POLARITY_ADBUS%d", i);
+		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
 		{
-			low_polarity |= (0x01<<i);
+			low_polarity |= (0x01 << i);
 		}
 	}
 
 	high_direction = 0x00;
-	for(i=0;i<4;i++)
+	for (i = 0; i < 4; i++)
 	{
-		sprintf(tmp_str,"PROBE_FTDI_SET_PIN_DIR_ACBUS%d",i);
-		if( jtagcore_getEnvVarValue( jc, tmp_str) > 0 )
+		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DIR_ACBUS%d", i);
+		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
 		{
-			high_direction |= (0x01<<i);
+			high_direction |= (0x01 << i);
 		}
 	}
 
 	high_output = 0x00;
-	for(i=0;i<4;i++)
+	for (i = 0; i < 4; i++)
 	{
-		sprintf(tmp_str,"PROBE_FTDI_SET_PIN_DEFAULT_STATE_ACBUS%d",i);
-		if( jtagcore_getEnvVarValue( jc, tmp_str) > 0 )
+		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DEFAULT_STATE_ACBUS%d", i);
+		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
 		{
-			high_output |= (0x01<<i);
+			high_output |= (0x01 << i);
 		}
 	}
 
 	high_polarity = 0x00;
-	for(i=0;i<4;i++)
+	for (i = 0; i < 4; i++)
 	{
-		sprintf(tmp_str,"PROBE_FTDI_SET_PIN_POLARITY_ACBUS%d",i);
-		if( jtagcore_getEnvVarValue( jc, tmp_str) > 0 )
+		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_POLARITY_ACBUS%d", i);
+		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
 		{
-			high_polarity |= (0x01<<i);
+			high_polarity |= (0x01 << i);
 		}
 	}
 
-	trst_oe_pin = jtagcore_getEnvVarValue( jc, "PROBE_FTDI_SET_TRST_OE_PINNUM" );
-	trst_state_pin = jtagcore_getEnvVarValue( jc, "PROBE_FTDI_SET_TRST_STATE_PINNUM" );
+	trst_oe_pin = jtagcore_getEnvVarValue(jc, "PROBE_FTDI_SET_TRST_OE_PINNUM");
+	trst_state_pin = jtagcore_getEnvVarValue(jc, "PROBE_FTDI_SET_TRST_STATE_PINNUM");
 
-	srst_oe_pin = jtagcore_getEnvVarValue( jc, "PROBE_FTDI_SET_SRST_OE_PINNUM" );
-	srst_state_pin = jtagcore_getEnvVarValue( jc, "PROBE_FTDI_SET_SRST_STATE_PINNUM" );
+	srst_oe_pin = jtagcore_getEnvVarValue(jc, "PROBE_FTDI_SET_SRST_OE_PINNUM");
+	srst_state_pin = jtagcore_getEnvVarValue(jc, "PROBE_FTDI_SET_SRST_STATE_PINNUM");
 
-	led_pin = jtagcore_getEnvVarValue( jc, "PROBE_FTDI_SET_CONNECTION_LED_PINNUM" );
+	led_pin = jtagcore_getEnvVarValue(jc, "PROBE_FTDI_SET_CONNECTION_LED_PINNUM");
 
 	/* jtag reset */
-	update_gpio_state(trst_oe_pin,1);
-	update_gpio_state(trst_state_pin,1);
+	update_gpio_state(trst_oe_pin, 1);
+	update_gpio_state(trst_state_pin, 1);
 
-	update_gpio_state(srst_oe_pin,1);
-	update_gpio_state(srst_state_pin,0);
+	update_gpio_state(srst_oe_pin, 1);
+	update_gpio_state(srst_state_pin, 0);
 
 	/* turn red LED off */
-	update_gpio_state(led_pin,0);
+	update_gpio_state(led_pin, 0);
 
-	ft2232_set_data_bits_low_byte( (unsigned char)(low_output ^ low_polarity), low_direction);
-	ft2232_set_data_bits_high_byte( (unsigned char)(high_output ^ high_polarity), high_direction);
+	ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
+	ft2232_set_data_bits_high_byte((unsigned char)(high_output ^ high_polarity), high_direction);
 
 	// Clock divisor
 	// 0x86 ValueL ValueH
 	// FT2232D/H
 	// TCK clock = (12Mhz or 60Mhz)/ ((1 + ([ValueH << 8 | ValueL]))*2)
 
-	baseclock = jtagcore_getEnvVarValue( jc, "PROBE_FTDI_INTERNAL_FREQ_KHZ");
-	tckfreq =   jtagcore_getEnvVarValue( jc, "PROBE_FTDI_TCK_FREQ_KHZ");
-	if( baseclock <= 0 || tckfreq <= 0){
-		jtagcore_logs_printf(jc,MSG_ERROR,"drv_FTDI_Init : Invalid probe clock settings !\r\n");
+	baseclock = jtagcore_getEnvVarValue(jc, "PROBE_FTDI_INTERNAL_FREQ_KHZ");
+	tckfreq = jtagcore_getEnvVarValue(jc, "PROBE_FTDI_TCK_FREQ_KHZ");
+	if (baseclock <= 0 || tckfreq <= 0)
+	{
+		jtagcore_logs_printf(jc, MSG_ERROR, "drv_FTDI_Init : Invalid probe clock settings !\r\n");
 		goto loadliberror;
 	}
 
-	divisor = ( ( baseclock / tckfreq ) - 2 ) / 2;
+	divisor = ((baseclock / tckfreq) - 2) / 2;
 
 	nbtosend = 0;
 	ftdi_out_buf[nbtosend++] = CMD_SET_DIVISOR;
 	ftdi_out_buf[nbtosend++] = divisor & 0xFF;
-	ftdi_out_buf[nbtosend++] = (divisor>>8) & 0xFF;
+	ftdi_out_buf[nbtosend++] = (divisor >> 8) & 0xFF;
 
 	status = pFT_Write(ftdih, ftdi_out_buf, nbtosend, &nbtosend);
-	if (status != FT_OK) {
-		jtagcore_logs_printf(jc,MSG_ERROR,"pFT_Write : Error %x !\r\n",status);
+	if (status != FT_OK)
+	{
+		jtagcore_logs_printf(jc, MSG_ERROR, "pFT_Write : Error %x !\r\n", status);
 		goto loadliberror;
 	}
 
@@ -655,25 +666,25 @@ int drv_FTDI_Init(jtag_core * jc, int sub_drv, char * params)
 	}
 #endif
 
-	if(jtagcore_getEnvVarValue( jc, "PROBE_FTDI_JTAG_ENABLE_RTCK") > 0)
+	if (jtagcore_getEnvVarValue(jc, "PROBE_FTDI_JTAG_ENABLE_RTCK") > 0)
 	{
 		ft2232h_enable_rtck(1);
 	}
 
 	/* Delay... */
-	genos_pause(jtagcore_getEnvVarValue( jc, "PROBE_FTDI_JTAG_TRST_DELAY_MS"));
+	genos_pause(jtagcore_getEnvVarValue(jc, "PROBE_FTDI_JTAG_TRST_DELAY_MS"));
 
 	/* turn red LED on */
-	update_gpio_state(led_pin,1);
+	update_gpio_state(led_pin, 1);
 
 	/* Release system & jtag reset */
-	update_gpio_state(trst_state_pin,0);
-	update_gpio_state(srst_state_pin,0);
+	update_gpio_state(trst_state_pin, 0);
+	update_gpio_state(srst_state_pin, 0);
 
-	ft2232_set_data_bits_low_byte( (unsigned char)(low_output ^ low_polarity), low_direction);
-	ft2232_set_data_bits_high_byte( (unsigned char)(high_output ^ high_polarity), high_direction);
+	ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
+	ft2232_set_data_bits_high_byte((unsigned char)(high_output ^ high_polarity), high_direction);
 
-	jtagcore_logs_printf(jc,MSG_INFO_0,"drv_FTDI_Init : Probe Driver loaded successfully...\r\n");
+	jtagcore_logs_printf(jc, MSG_INFO_0, "drv_FTDI_Init : Probe Driver loaded successfully...\r\n");
 
 	return 0;
 
@@ -683,7 +694,7 @@ loadliberror:
 	return -1;
 }
 
-int drv_FTDI_DeInit(jtag_core * jc)
+int drv_FTDI_DeInit(jtag_core *jc)
 {
 	pFT_Close(ftdih);
 	FreeLibrary(lib_handle);
@@ -691,14 +702,14 @@ int drv_FTDI_DeInit(jtag_core * jc)
 	return 0;
 }
 
-int drv_FTDI_TDOTDI_xfer(jtag_core * jc, unsigned char * str_out, unsigned char * str_in, int size)
+int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *str_in, int size)
 {
-	int wr_bit_index,rd_bit_index;
-	int j,l,payloadsize;
+	int wr_bit_index, rd_bit_index;
+	int j, l, payloadsize;
 	int rounded_size;
-	DWORD nbRead,nbtosend;
+	DWORD nbRead, nbtosend;
 	FT_STATUS status;
-	unsigned char opcode,data;
+	unsigned char opcode, data;
 
 	rd_bit_index = 0;
 	wr_bit_index = 0;
@@ -709,12 +720,12 @@ int drv_FTDI_TDOTDI_xfer(jtag_core * jc, unsigned char * str_out, unsigned char 
 	if (size)
 	{
 		// Set the first TMS/DOUT
-		if ( str_out[wr_bit_index] & JTAG_STR_TMS )
+		if (str_out[wr_bit_index] & JTAG_STR_TMS)
 		{
-			if( str_in )
-				opcode = ( OP_WR_TMS | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR | OP_RD_TDO );  // with TDO read back
+			if (str_in)
+				opcode = (OP_WR_TMS | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR); // with TDO read back
 			else
-				opcode = ( OP_WR_TMS | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR );
+				opcode = (OP_WR_TMS | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR);
 
 			nbtosend = 0;
 
@@ -724,10 +735,10 @@ int drv_FTDI_TDOTDI_xfer(jtag_core * jc, unsigned char * str_out, unsigned char 
 			data = 0x00;
 
 			if (str_out[wr_bit_index] & JTAG_STR_DOUT)
-				data = 0x80;     // Bit 7: TDI/DO pin state
+				data = 0x80; // Bit 7: TDI/DO pin state
 
 			if (str_out[wr_bit_index] & JTAG_STR_TMS)
-				data |= 0x3F;    // TMS state
+				data |= 0x3F; // TMS state
 
 			wr_bit_index++;
 
@@ -735,7 +746,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core * jc, unsigned char * str_out, unsigned char 
 
 			status = pFT_Write(ftdih, ftdi_out_buf, nbtosend, &nbtosend);
 
-			if ( opcode & OP_RD_TDO )
+			if (opcode & OP_RD_TDO)
 			{
 				status = pFT_GetQueueStatus(ftdih, &nbRead);
 				while (nbRead < 1 && (status == FT_OK))
@@ -746,7 +757,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core * jc, unsigned char * str_out, unsigned char 
 
 				status = pFT_Read(ftdih, &ftdi_in_buf, nbRead, &nbRead);
 
-				if ( ftdi_in_buf[0] & 0x01 )
+				if (ftdi_in_buf[0] & 0x01)
 				{
 					str_in[rd_bit_index++] = JTAG_STR_DOUT;
 				}
@@ -757,24 +768,24 @@ int drv_FTDI_TDOTDI_xfer(jtag_core * jc, unsigned char * str_out, unsigned char 
 			}
 		}
 
-		if( wr_bit_index >= size )
+		if (wr_bit_index >= size)
 			return 0;
 
 		rounded_size = (size - wr_bit_index) & ~(0x7);
-		if( rounded_size )
+		if (rounded_size)
 		{
 			// byte(s) buffer transmission/reception
 
-			if( str_in )
-				opcode = ( OP_WR_TDI | OP_LSB_FIRST | OP_FEDGE_WR | OP_RD_TDO );
+			if (str_in)
+				opcode = (OP_WR_TDI | OP_LSB_FIRST | OP_FEDGE_WR | OP_RD_TDO);
 			else
-				opcode = ( OP_WR_TDI | OP_LSB_FIRST | OP_FEDGE_WR );
+				opcode = (OP_WR_TDI | OP_LSB_FIRST | OP_FEDGE_WR);
 
 			nbtosend = 0;
 
 			ftdi_out_buf[nbtosend++] = opcode;
-			ftdi_out_buf[nbtosend++] = ( ( (rounded_size>>3)-1 ) & 0xff );  // (Size-1) Low byte
-			ftdi_out_buf[nbtosend++] = ( ( (rounded_size>>3)-1 ) >> 8 );    // (Size-1) High byte
+			ftdi_out_buf[nbtosend++] = (((rounded_size >> 3) - 1) & 0xff); // (Size-1) Low byte
+			ftdi_out_buf[nbtosend++] = (((rounded_size >> 3) - 1) >> 8);   // (Size-1) High byte
 
 			ftdi_out_buf[nbtosend] = 0x00;
 
@@ -807,7 +818,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core * jc, unsigned char * str_out, unsigned char 
 				{
 					Sleep(3);
 					status = pFT_GetQueueStatus(ftdih, &nbRead);
-				} while (nbRead < (unsigned long)(rounded_size >> 3) && (status == FT_OK ));
+				} while (nbRead < (unsigned long)(rounded_size >> 3) && (status == FT_OK));
 
 				status = pFT_Read(ftdih, &ftdi_in_buf, nbRead, &nbRead);
 
@@ -825,20 +836,20 @@ int drv_FTDI_TDOTDI_xfer(jtag_core * jc, unsigned char * str_out, unsigned char 
 			}
 		}
 
-		if( wr_bit_index < size )
+		if (wr_bit_index < size)
 		{
 			// Send the remaining bits...
 
-			if( str_in )
-				opcode = ( OP_WR_TDI | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR | OP_RD_TDO ); //bit mode with TDO read back
+			if (str_in)
+				opcode = (OP_WR_TDI | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR | OP_RD_TDO); // bit mode with TDO read back
 			else
-				opcode = ( OP_WR_TDI | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR ); //bit mode
+				opcode = (OP_WR_TDI | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR); // bit mode
 
 			nbtosend = 0;
 
 			ftdi_out_buf[nbtosend++] = opcode;
-			ftdi_out_buf[nbtosend++] = (((size - wr_bit_index)-1) & 0x7); // Size field
-			ftdi_out_buf[nbtosend] = 0x00;   // Data field
+			ftdi_out_buf[nbtosend++] = (((size - wr_bit_index) - 1) & 0x7); // Size field
+			ftdi_out_buf[nbtosend] = 0x00;									// Data field
 
 			j = 0;
 			payloadsize = 0;
@@ -858,13 +869,13 @@ int drv_FTDI_TDOTDI_xfer(jtag_core * jc, unsigned char * str_out, unsigned char 
 
 			status = pFT_Write(ftdih, ftdi_out_buf, nbtosend, &nbtosend);
 
-			if ( opcode & OP_RD_TDO )
+			if (opcode & OP_RD_TDO)
 			{
 				do
 				{
 					Sleep(3);
 					status = pFT_GetQueueStatus(ftdih, &nbRead);
-				} while ( ( nbRead < 1 ) && ( status == FT_OK ) );
+				} while ((nbRead < 1) && (status == FT_OK));
 
 				status = pFT_Read(ftdih, &ftdi_in_buf, nbRead, &nbRead);
 
@@ -886,7 +897,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core * jc, unsigned char * str_out, unsigned char 
 	return 0;
 }
 
-int drv_FTDI_TMS_xfer(jtag_core * jc, unsigned char * str_out, int size)
+int drv_FTDI_TMS_xfer(jtag_core *jc, unsigned char *str_out, int size)
 {
 	int i;
 	DWORD nbtosend;
@@ -913,9 +924,9 @@ int drv_FTDI_TMS_xfer(jtag_core * jc, unsigned char * str_out, int size)
 			{
 				nbtosend = 0;
 				ftdi_out_buf[nbtosend++] = (OP_WR_TMS | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR); // cmd
-				ftdi_out_buf[nbtosend++] = 0x06 - 1; // 6 Bit
+				ftdi_out_buf[nbtosend++] = 0x06 - 1;											   // 6 Bit
 
-				if ((databyte&0x20) && size)
+				if ((databyte & 0x20) && size)
 					ftdi_out_buf[nbtosend++] = databyte | 0x40;
 				else
 					ftdi_out_buf[nbtosend++] = databyte;
@@ -941,9 +952,7 @@ int drv_FTDI_TMS_xfer(jtag_core * jc, unsigned char * str_out, int size)
 		}
 		else
 		{
-
 		}
-
 	}
 
 	if (status != FT_OK)
@@ -956,27 +965,25 @@ int drv_FTDI_TMS_xfer(jtag_core * jc, unsigned char * str_out, int size)
 	}
 }
 
-int drv_FTDI_libGetDrv(jtag_core * jc,int sub_drv,unsigned int infotype,void * returnvalue)
+int drv_FTDI_libGetDrv(jtag_core *jc, int sub_drv, unsigned int infotype, void *returnvalue)
 {
 
 	drv_ptr drv_funcs =
-	{
-		(DRV_DETECT)         drv_FTDI_Detect,
-		(DRV_INIT)           drv_FTDI_Init,
-		(DRV_DEINIT)         drv_FTDI_DeInit,
-		(DRV_TXTMS)          drv_FTDI_TMS_xfer,
-		(DRV_TXRXDATA)       drv_FTDI_TDOTDI_xfer,
-		(DRV_GETMODULEINFOS) drv_FTDI_libGetDrv
-	};
+		{
+			(DRV_DETECT)drv_FTDI_Detect,
+			(DRV_INIT)drv_FTDI_Init,
+			(DRV_DEINIT)drv_FTDI_DeInit,
+			(DRV_TXTMS)drv_FTDI_TMS_xfer,
+			(DRV_TXRXDATA)drv_FTDI_TDOTDI_xfer,
+			(DRV_GETMODULEINFOS)drv_FTDI_libGetDrv};
 
 	return GetDrvInfo(
-			jc,
-			infotype,
-			returnvalue,
-			subdrv_list[sub_drv].drv_id,
-			subdrv_list[sub_drv].drv_desc,
-			&drv_funcs
-			);
+		jc,
+		infotype,
+		returnvalue,
+		subdrv_list[sub_drv].drv_id,
+		subdrv_list[sub_drv].drv_desc,
+		&drv_funcs);
 }
 
 #endif

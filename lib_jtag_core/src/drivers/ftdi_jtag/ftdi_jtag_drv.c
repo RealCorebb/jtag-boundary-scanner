@@ -723,7 +723,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *s
 		if (str_out[wr_bit_index] & JTAG_STR_TMS)
 		{
 			if (str_in)
-				opcode = (OP_WR_TMS | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR); // with TDO read back
+				opcode = (OP_WR_TMS | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR | OP_RD_TDO); // with TDO read back
 			else
 				opcode = (OP_WR_TMS | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR);
 
@@ -751,7 +751,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *s
 				status = pFT_GetQueueStatus(ftdih, &nbRead);
 				while (nbRead < 1 && (status == FT_OK))
 				{
-					Sleep(3);
+					// Sleep(3);
 					status = pFT_GetQueueStatus(ftdih, &nbRead);
 				}
 
@@ -777,7 +777,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *s
 			// byte(s) buffer transmission/reception
 
 			if (str_in)
-				opcode = (OP_WR_TDI | OP_LSB_FIRST | OP_FEDGE_WR);
+				opcode = (OP_WR_TDI | OP_LSB_FIRST | OP_FEDGE_WR | OP_RD_TDO);
 			else
 				opcode = (OP_WR_TDI | OP_LSB_FIRST | OP_FEDGE_WR);
 
@@ -816,7 +816,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *s
 			{
 				do
 				{
-					Sleep(3);
+					// Sleep(3);
 					status = pFT_GetQueueStatus(ftdih, &nbRead);
 				} while (nbRead < (unsigned long)(rounded_size >> 3) && (status == FT_OK));
 
@@ -841,7 +841,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *s
 			// Send the remaining bits...
 
 			if (str_in)
-				opcode = (OP_WR_TDI | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR); // bit mode with TDO read back
+				opcode = (OP_WR_TDI | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR | OP_RD_TDO); // bit mode with TDO read back
 			else
 				opcode = (OP_WR_TDI | OP_LSB_FIRST | OP_BIT_MODE | OP_FEDGE_WR); // bit mode
 
@@ -873,7 +873,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *s
 			{
 				do
 				{
-					Sleep(3);
+					// Sleep(3);
 					status = pFT_GetQueueStatus(ftdih, &nbRead);
 				} while ((nbRead < 1) && (status == FT_OK));
 

@@ -751,7 +751,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *s
 				status = pFT_GetQueueStatus(ftdih, &nbRead);
 				while (nbRead < 1 && (status == FT_OK))
 				{
-					// Sleep(3);
+					Sleep(3);
 					status = pFT_GetQueueStatus(ftdih, &nbRead);
 				}
 
@@ -816,7 +816,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *s
 			{
 				do
 				{
-					// Sleep(3);
+					Sleep(3);
 					status = pFT_GetQueueStatus(ftdih, &nbRead);
 				} while (nbRead < (unsigned long)(rounded_size >> 3) && (status == FT_OK));
 
@@ -873,7 +873,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *s
 			{
 				do
 				{
-					// Sleep(3);
+					Sleep(3);
 					status = pFT_GetQueueStatus(ftdih, &nbRead);
 				} while ((nbRead < 1) && (status == FT_OK));
 

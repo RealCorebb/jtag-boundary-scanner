@@ -792,7 +792,7 @@ int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 				}
 			}
 
-			if (!jc->IR_filled)
+			/* if (!jc->IR_filled)
 			{
 				jc->IR_filled = 1;
 				//  Exit1-DR -> Go to shift-IR
@@ -962,7 +962,7 @@ int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 						}
 					}
 				}
-			}
+			} */
 
 			// Return To idle
 			buf_out[0] = JTAG_STR_TMS;

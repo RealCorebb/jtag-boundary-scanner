@@ -42,34 +42,34 @@
 
 #include "config_script.h"
 
-jtag_core * jtagcore_init()
+jtag_core *jtagcore_init()
 {
-	jtag_core * jc;
-	script_ctx * sctx;
+	jtag_core *jc;
+	script_ctx *sctx;
 
 	jc = (jtag_core *)malloc(sizeof(jtag_core));
-	if ( jc )
+	if (jc)
 	{
-		memset( jc, 0, sizeof(jtag_core) );
+		memset(jc, 0, sizeof(jtag_core));
 
-		jc->envvar = (void*)initEnv(NULL, NULL);
+		jc->envvar = (void *)initEnv(NULL, NULL);
 
-		jtagcore_setEnvVar( jc, "LIBVERSION", "v"LIB_JTAG_CORE_VERSION);
+		jtagcore_setEnvVar(jc, "LIBVERSION", "v" LIB_JTAG_CORE_VERSION);
 
 		sctx = jtagcore_initScript(jc);
 
-		jtagcore_execScriptRam( sctx, config_script, config_script_len );
+		jtagcore_execScriptRam(sctx, config_script, config_script_len);
 
-		jtagcore_execScriptFile( sctx, "config.script" );
+		jtagcore_execScriptFile(sctx, "config.script");
 
-		if(jtagcore_getEnvVar( jc, "LOG_MESSAGES_FILTER_LEVEL", NULL))
+		if (jtagcore_getEnvVar(jc, "LOG_MESSAGES_FILTER_LEVEL", NULL))
 		{
-			jtagcore_set_logs_level( jc, jtagcore_getEnvVarValue( jc, "LOG_MESSAGES_FILTER_LEVEL") );
+			jtagcore_set_logs_level(jc, jtagcore_getEnvVarValue(jc, "LOG_MESSAGES_FILTER_LEVEL"));
 		}
 
-		if(jtagcore_getEnvVar( jc, "LOG_MESSAGES_FILE_OUTPUT", NULL))
+		if (jtagcore_getEnvVar(jc, "LOG_MESSAGES_FILE_OUTPUT", NULL))
 		{
-			jtagcore_set_logs_file( jc, jtagcore_getEnvVar( jc, "LOG_MESSAGES_FILE_OUTPUT", NULL) );
+			jtagcore_set_logs_file(jc, jtagcore_getEnvVar(jc, "LOG_MESSAGES_FILE_OUTPUT", NULL));
 		}
 
 		jtagcore_deinitScript(sctx);
@@ -78,7 +78,7 @@ jtag_core * jtagcore_init()
 	return jc;
 }
 
-int jtagcore_resetchain(jtag_core * jc)
+int jtagcore_resetchain(jtag_core *jc)
 {
 	int i;
 	unsigned char buf_out[16];
@@ -99,20 +99,20 @@ int jtagcore_resetchain(jtag_core * jc)
 	return JTAG_CORE_BAD_PARAMETER;
 }
 
-int jtagcore_scan_and_init_chain(jtag_core * jc)
+int jtagcore_scan_and_init_chain(jtag_core *jc)
 {
 	unsigned char buf_in[512], buf_out[512];
-	int i,j;
+	int i, j;
 	int device_found_1, device_found_2, device_found;
 
 	device_found = 0;
-	if (jc )
+	if (jc)
 	{
-		for(i = 0;i<jc->nb_of_devices_in_chain;i++)
+		for (i = 0; i < jc->nb_of_devices_in_chain; i++)
 		{
 			if (jc->devices_list[i].bsdl)
 			{
-				unload_bsdlfile(jc,jc->devices_list[i].bsdl);
+				unload_bsdlfile(jc, jc->devices_list[i].bsdl);
 				jc->devices_list[i].bsdl = 0;
 			}
 		}
@@ -135,7 +135,7 @@ int jtagcore_scan_and_init_chain(jtag_core * jc)
 
 		// Measure the total IR lenght
 
-		//Flush the IR regs
+		// Flush the IR regs
 		for (i = 0; i < sizeof(buf_out); i++)
 		{
 			buf_out[i] = 0;
@@ -151,7 +151,7 @@ int jtagcore_scan_and_init_chain(jtag_core * jc)
 		jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, (unsigned char *)&buf_in, sizeof(buf_out));
 
 		i = 0;
-		while( i < sizeof(buf_in) && !buf_in[i])
+		while (i < sizeof(buf_in) && !buf_in[i])
 		{
 			i++;
 		}
@@ -175,7 +175,6 @@ int jtagcore_scan_and_init_chain(jtag_core * jc)
 		buf_out[2] = 0x00;
 		buf_out[3] = 0x00;
 		jc->io_functions.drv_TX_TMS(jc, (unsigned char *)&buf_out, 4);
-
 
 		// Now fill the full chain to count the number of devices
 		for (i = 0; i < sizeof(buf_out); i++)
@@ -219,7 +218,7 @@ int jtagcore_scan_and_init_chain(jtag_core * jc)
 
 		if (device_found_1 == device_found_2)
 		{
-			if(device_found_1!=sizeof(buf_out))
+			if (device_found_1 != sizeof(buf_out))
 			{
 				// Detection valid !
 				device_found = device_found_1;
@@ -270,10 +269,9 @@ int jtagcore_scan_and_init_chain(jtag_core * jc)
 	}
 
 	return JTAG_CORE_BAD_PARAMETER;
-
 }
 
-int jtagcore_get_number_of_devices(jtag_core * jc)
+int jtagcore_get_number_of_devices(jtag_core *jc)
 {
 	if (jc)
 	{
@@ -283,7 +281,7 @@ int jtagcore_get_number_of_devices(jtag_core * jc)
 	return JTAG_CORE_BAD_PARAMETER;
 }
 
-unsigned long jtagcore_get_dev_id(jtag_core * jc,int device)
+unsigned long jtagcore_get_dev_id(jtag_core *jc, int device)
 {
 	if (jc && device >= 0)
 	{
@@ -296,14 +294,14 @@ unsigned long jtagcore_get_dev_id(jtag_core * jc,int device)
 	return JTAG_CORE_BAD_PARAMETER;
 }
 
-int jtagcore_loadbsdlfile(jtag_core * jc, char * path, int device)
+int jtagcore_loadbsdlfile(jtag_core *jc, char *path, int device)
 {
-	jtag_bsdl * bsdl_file;
+	jtag_bsdl *bsdl_file;
 	int i;
 
-	if ( (device < jc->nb_of_devices_in_chain && device < MAX_NB_JTAG_DEVICE && device >= 0) || device == -1)
+	if ((device < jc->nb_of_devices_in_chain && device < MAX_NB_JTAG_DEVICE && device >= 0) || device == -1)
 	{
-		bsdl_file = load_bsdlfile(jc,path);
+		bsdl_file = load_bsdlfile(jc, path);
 		if (bsdl_file)
 		{
 			if (device == -1)
@@ -314,7 +312,7 @@ int jtagcore_loadbsdlfile(jtag_core * jc, char * path, int device)
 				{
 					if (jc->devices_list[i].bsdl)
 					{
-						unload_bsdlfile(jc,jc->devices_list[i].bsdl);
+						unload_bsdlfile(jc, jc->devices_list[i].bsdl);
 						jc->devices_list[i].bsdl = 0;
 					}
 
@@ -324,13 +322,12 @@ int jtagcore_loadbsdlfile(jtag_core * jc, char * path, int device)
 				jc->nb_of_devices_in_chain = 1;
 
 				jc->devices_list[0].bsdl = bsdl_file;
-
 			}
 			else
 			{
 				if (jc->devices_list[device].bsdl)
 				{
-					unload_bsdlfile(jc,jc->devices_list[device].bsdl);
+					unload_bsdlfile(jc, jc->devices_list[device].bsdl);
 				}
 
 				jc->devices_list[device].bsdl = bsdl_file;
@@ -352,69 +349,67 @@ int jtagcore_loadbsdlfile(jtag_core * jc, char * path, int device)
 				memset(jc->devices_list[device].out_boundary_scan, 0, bsdl_file->number_of_chainbits);
 				for (i = 0; i < bsdl_file->number_of_chainbits; i++)
 				{
-					if(bsdl_file->chain_list[i].safe_state == STATE_HIGH)
+					if (bsdl_file->chain_list[i].safe_state == STATE_HIGH)
 						jc->devices_list[device].out_boundary_scan[i] = 0x01;
 					else
 						jc->devices_list[device].out_boundary_scan[i] = 0x00;
-
 				}
 
 				return JTAG_CORE_NO_ERROR;
 			}
 
 			return JTAG_CORE_MEM_ERROR;
-
 		}
 	}
 
 	return JTAG_CORE_BAD_PARAMETER;
 }
 
-unsigned long jtagcore_get_bsdl_id(jtag_core * jc, char * path)
+unsigned long jtagcore_get_bsdl_id(jtag_core *jc, char *path)
 {
-	jtag_bsdl * bsdl_file;
+	jtag_bsdl *bsdl_file;
 	unsigned long chip_id;
 
-	bsdl_file = load_bsdlfile(jc,path);
+	bsdl_file = load_bsdlfile(jc, path);
 	if (bsdl_file)
 	{
 		chip_id = bsdl_file->chip_id;
-		unload_bsdlfile(jc,bsdl_file);
+		unload_bsdlfile(jc, bsdl_file);
 		return chip_id;
 	}
 
 	return 0;
 }
 
-int jtagcore_get_dev_name(jtag_core * jc, int device, char * devname, char * bsdlpath)
+int jtagcore_get_dev_name(jtag_core *jc, int device, char *devname, char *bsdlpath)
 {
-	jtag_bsdl * bsdl_file;
+	jtag_bsdl *bsdl_file;
 
-	if ( device < jc->nb_of_devices_in_chain && device < MAX_NB_JTAG_DEVICE && device >= 0 )
+	if (device < jc->nb_of_devices_in_chain && device < MAX_NB_JTAG_DEVICE && device >= 0)
 	{
 		if (jc->devices_list[device].bsdl)
 		{
 			bsdl_file = jc->devices_list[device].bsdl;
 
-			if(devname)
+			if (devname)
 			{
-				strcpy(devname,bsdl_file->entity_name);
+				strcpy(devname, bsdl_file->entity_name);
 			}
 
-			if(bsdlpath)
+			if (bsdlpath)
 			{
-				strcpy(bsdlpath,bsdl_file->src_filename);
+				strcpy(bsdlpath, bsdl_file->src_filename);
 			}
 
 			return JTAG_CORE_NO_ERROR;
 		}
 
-		if(devname)
+		if (devname)
 		{
 			devname[0] = '\0';
 		}
 
-		if(bsdlpath)
+		if (bsdlpath)
 		{
 			bsdlpath[0] = '\0';
 		}
@@ -425,11 +420,11 @@ int jtagcore_get_dev_name(jtag_core * jc, int device, char * devname, char * bsd
 	return JTAG_CORE_BAD_PARAMETER;
 }
 
-int jtagcore_get_number_of_pins(jtag_core * jc, int device)
+int jtagcore_get_number_of_pins(jtag_core *jc, int device)
 {
-	jtag_bsdl * bsdl_file;
+	jtag_bsdl *bsdl_file;
 
-	if ( device < jc->nb_of_devices_in_chain && device < MAX_NB_JTAG_DEVICE && device >= 0 )
+	if (device < jc->nb_of_devices_in_chain && device < MAX_NB_JTAG_DEVICE && device >= 0)
 	{
 		if (jc->devices_list[device].bsdl)
 		{
@@ -442,15 +437,15 @@ int jtagcore_get_number_of_pins(jtag_core * jc, int device)
 	return JTAG_CORE_BAD_PARAMETER;
 }
 
-int jtagcore_get_pin_properties(jtag_core * jc, int device,int pin,char * pinname,int maxsize,int * type)
+int jtagcore_get_pin_properties(jtag_core *jc, int device, int pin, char *pinname, int maxsize, int *type)
 {
-	jtag_bsdl * bsdl_file;
+	jtag_bsdl *bsdl_file;
 	int type_code;
 
 	if (device >= jc->nb_of_devices_in_chain ||
 		device >= MAX_NB_JTAG_DEVICE ||
 		device < 0 ||
-		pin < 0 )
+		pin < 0)
 	{
 		return JTAG_CORE_BAD_PARAMETER;
 	}
@@ -459,7 +454,7 @@ int jtagcore_get_pin_properties(jtag_core * jc, int device,int pin,char * pinnam
 	{
 		bsdl_file = jc->devices_list[device].bsdl;
 
-		if (pin < bsdl_file->number_of_pins  )
+		if (pin < bsdl_file->number_of_pins)
 		{
 			type_code = 0x00;
 
@@ -490,14 +485,14 @@ int jtagcore_get_pin_properties(jtag_core * jc, int device,int pin,char * pinnam
 	return JTAG_CORE_BAD_PARAMETER;
 }
 
-int jtagcore_get_pin_state(jtag_core * jc, int device, int pin, int type)
+int jtagcore_get_pin_state(jtag_core *jc, int device, int pin, int type)
 {
-	jtag_bsdl * bsdl_file;
+	jtag_bsdl *bsdl_file;
 	int bit_number, ret;
 	int disable_state;
 
 	ret = JTAG_CORE_BAD_PARAMETER;
-	if (device < jc->nb_of_devices_in_chain && device < MAX_NB_JTAG_DEVICE && device >= 0 && pin >= 0 )
+	if (device < jc->nb_of_devices_in_chain && device < MAX_NB_JTAG_DEVICE && device >= 0 && pin >= 0)
 	{
 		if (jc->devices_list[device].bsdl)
 		{
@@ -584,7 +579,6 @@ int jtagcore_get_pin_state(jtag_core * jc, int device, int pin, int type)
 							ret = 0x00;
 					}
 					break;
-
 				}
 			}
 		}
@@ -592,15 +586,15 @@ int jtagcore_get_pin_state(jtag_core * jc, int device, int pin, int type)
 	return ret;
 }
 
-int jtagcore_set_pin_state(jtag_core * jc, int device, int pin, int type,int state)
+int jtagcore_set_pin_state(jtag_core *jc, int device, int pin, int type, int state)
 {
-	jtag_bsdl * bsdl_file;
-	int bit_number,ret;
+	jtag_bsdl *bsdl_file;
+	int bit_number, ret;
 	int disable_state;
 
 	ret = JTAG_CORE_BAD_PARAMETER;
 
-	if ( device < jc->nb_of_devices_in_chain && device < MAX_NB_JTAG_DEVICE && device >= 0 && pin >= 0 )
+	if (device < jc->nb_of_devices_in_chain && device < MAX_NB_JTAG_DEVICE && device >= 0 && pin >= 0)
 	{
 		if (jc->devices_list[device].bsdl)
 		{
@@ -649,18 +643,16 @@ int jtagcore_set_pin_state(jtag_core * jc, int device, int pin, int type,int sta
 						ret = 0;
 					}
 					break;
-
 				}
 			}
 		}
 	}
 	return ret;
-
 }
 
-int jtagcore_get_pin_id(jtag_core * jc, int device, char * pinname)
+int jtagcore_get_pin_id(jtag_core *jc, int device, char *pinname)
 {
-	jtag_bsdl * bsdl_file;
+	jtag_bsdl *bsdl_file;
 	int pin;
 
 	if (device < jc->nb_of_devices_in_chain && device < MAX_NB_JTAG_DEVICE && device >= 0 && pinname)
@@ -669,11 +661,11 @@ int jtagcore_get_pin_id(jtag_core * jc, int device, char * pinname)
 		{
 			bsdl_file = jc->devices_list[device].bsdl;
 
-			for ( pin = 0; pin < bsdl_file->number_of_pins; pin++)
+			for (pin = 0; pin < bsdl_file->number_of_pins; pin++)
 			{
-				if(bsdl_file->pins_list[pin].pinname)
+				if (bsdl_file->pins_list[pin].pinname)
 				{
-					if(!strcmp(bsdl_file->pins_list[pin].pinname, pinname))
+					if (!strcmp(bsdl_file->pins_list[pin].pinname, pinname))
 					{
 						return pin;
 					}
@@ -687,8 +679,7 @@ int jtagcore_get_pin_id(jtag_core * jc, int device, char * pinname)
 	return JTAG_CORE_BAD_PARAMETER;
 }
 
-
-int jtagcore_set_scan_mode(jtag_core * jc, int device, int scan_mode)
+int jtagcore_set_scan_mode(jtag_core *jc, int device, int scan_mode)
 {
 	int ret;
 
@@ -698,33 +689,33 @@ int jtagcore_set_scan_mode(jtag_core * jc, int device, int scan_mode)
 	{
 		switch (scan_mode)
 		{
-			case JTAG_CORE_SAMPLE_SCANMODE:
-				jc->devices_list[device].scan_mode = JTAG_CORE_SAMPLE_SCANMODE;
-				jc->IR_filled = 0;
+		case JTAG_CORE_SAMPLE_SCANMODE:
+			jc->devices_list[device].scan_mode = JTAG_CORE_SAMPLE_SCANMODE;
+			jc->IR_filled = 0;
 
-				ret = JTAG_CORE_NO_ERROR;
+			ret = JTAG_CORE_NO_ERROR;
 			break;
-			case JTAG_CORE_EXTEST_SCANMODE:
-				jc->devices_list[device].scan_mode = JTAG_CORE_EXTEST_SCANMODE;
-				jc->IR_filled = 0;
+		case JTAG_CORE_EXTEST_SCANMODE:
+			jc->devices_list[device].scan_mode = JTAG_CORE_EXTEST_SCANMODE;
+			jc->IR_filled = 0;
 
-				ret = JTAG_CORE_NO_ERROR;
-				break;
-			default:
-				break;
+			ret = JTAG_CORE_NO_ERROR;
+			break;
+		default:
+			break;
 		}
 	}
 
 	return ret;
 }
 
-int jtagcore_push_and_pop_chain(jtag_core * jc, int mode)
+int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 {
-	unsigned char buf_out[512];
-	unsigned char buf_in[512];
-	int d,i,irlen;
-	int bit,first_bit,jtag_chain_check_needed;
-	jtag_bsdl * bsdl;
+	unsigned char buf_out[128];
+	unsigned char buf_in[128];
+	int d, i, irlen;
+	int bit, first_bit, jtag_chain_check_needed;
+	jtag_bsdl *bsdl;
 
 	jtag_chain_check_needed = 0;
 
@@ -732,7 +723,7 @@ int jtagcore_push_and_pop_chain(jtag_core * jc, int mode)
 	{
 		if (jc->nb_of_devices_in_chain && jc->io_functions.drv_TX_TMS)
 		{
-			//Idle State -> Go to shift-DR
+			// Idle State -> Go to shift-DR
 			buf_out[0] = 0x00;
 			buf_out[1] = JTAG_STR_TMS;
 			buf_out[2] = 0x00;
@@ -757,16 +748,16 @@ int jtagcore_push_and_pop_chain(jtag_core * jc, int mode)
 						}
 
 						// Check the incomming data
-						if(bsdl->number_of_chainbits)
+						if (bsdl->number_of_chainbits)
 						{
 							first_bit = jc->devices_list[d].in_boundary_scan[0];
 							bit = 0;
-							while( (bit < bsdl->number_of_chainbits) && (first_bit == jc->devices_list[d].in_boundary_scan[bit]) )
+							while ((bit < bsdl->number_of_chainbits) && (first_bit == jc->devices_list[d].in_boundary_scan[bit]))
 							{
 								bit++;
 							}
 
-							if( bit == bsdl->number_of_chainbits)
+							if (bit == bsdl->number_of_chainbits)
 							{
 								// All bits have the same value.
 								// Program a jtag chain check
@@ -789,13 +780,12 @@ int jtagcore_push_and_pop_chain(jtag_core * jc, int mode)
 							jc->io_functions.drv_TXRX_DATA(jc, jc->devices_list[d].out_boundary_scan, 0, bsdl->number_of_chainbits);
 						}
 					}
-
 				}
 				else
 				{
 					// Bypassed
-					if (d == (jc->nb_of_devices_in_chain-1)) // Last device in chain ?
-						buf_out[0] =  JTAG_STR_TMS;
+					if (d == (jc->nb_of_devices_in_chain - 1)) // Last device in chain ?
+						buf_out[0] = JTAG_STR_TMS;
 					else
 						buf_out[0] = 0x00;
 					jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, 0, 1);
@@ -813,11 +803,10 @@ int jtagcore_push_and_pop_chain(jtag_core * jc, int mode)
 				buf_out[4] = 0x00;
 				jc->io_functions.drv_TX_TMS(jc, (unsigned char *)&buf_out, 5);
 
-
-				if(jtag_chain_check_needed)
+				if (jtag_chain_check_needed)
 				{
 					// Zero test
-					for(i=0;i<512;i++)
+					for (i = 0; i < 128; i++)
 					{
 						buf_out[i] = 0;
 					}
@@ -825,23 +814,23 @@ int jtagcore_push_and_pop_chain(jtag_core * jc, int mode)
 					jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, 0, sizeof(buf_in));
 					jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, 0, sizeof(buf_in));
 					jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, 0, sizeof(buf_in));
-					memset(buf_in,1,sizeof(buf_in));
+					memset(buf_in, 1, sizeof(buf_in));
 					jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, buf_in, sizeof(buf_in));
 
 					i = 0;
-					while(i<sizeof(buf_in) && buf_in[i] == 0)
+					while (i < sizeof(buf_in) && buf_in[i] == 0)
 					{
 						i++;
 					}
 
-					if( i != sizeof(buf_in) )
+					if (i != sizeof(buf_in))
 					{
 						goto jtag_error;
 					}
 
 					// One test
 
-					for(i=0;i<512;i++)
+					for (i = 0; i < 128; i++)
 					{
 						buf_out[i] = JTAG_STR_DOUT;
 					}
@@ -849,25 +838,25 @@ int jtagcore_push_and_pop_chain(jtag_core * jc, int mode)
 					jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, 0, sizeof(buf_in));
 					jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, 0, sizeof(buf_in));
 					jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, 0, sizeof(buf_in));
-					memset(buf_in,0,sizeof(buf_in));
+					memset(buf_in, 0, sizeof(buf_in));
 					jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, buf_in, sizeof(buf_in));
 
 					i = 0;
-					while(i<sizeof(buf_in) && buf_in[i] == JTAG_STR_DOUT)
+					while (i < sizeof(buf_in) && buf_in[i] == JTAG_STR_DOUT)
 					{
 						i++;
 					}
 
-					if( i != sizeof(buf_in) )
+					if (i != sizeof(buf_in))
 					{
 						goto jtag_error;
 					}
 
 					// Data toggle test.
 
-					for(i=0;i<512;i++)
+					for (i = 0; i < 128; i++)
 					{
-						if(i & 1)
+						if (i & 1)
 							buf_out[i] = JTAG_STR_DOUT;
 						else
 							buf_out[i] = 0x00;
@@ -876,18 +865,18 @@ int jtagcore_push_and_pop_chain(jtag_core * jc, int mode)
 					jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, 0, sizeof(buf_in));
 					jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, 0, sizeof(buf_in));
 					jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, 0, sizeof(buf_in));
-					memset(buf_in,0,sizeof(buf_in));
+					memset(buf_in, 0, sizeof(buf_in));
 					jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, buf_in, sizeof(buf_in));
 
 					i = 1;
 					bit = buf_in[0];
-					while( i < sizeof(buf_in) && buf_in[i] != bit)
+					while (i < sizeof(buf_in) && buf_in[i] != bit)
 					{
 						bit = buf_in[i];
 						i++;
 					}
 
-					if( i != sizeof(buf_in) )
+					if (i != sizeof(buf_in))
 					{
 						goto jtag_error;
 					}
@@ -898,24 +887,23 @@ int jtagcore_push_and_pop_chain(jtag_core * jc, int mode)
 				for (d = 0; d < jc->nb_of_devices_in_chain; d++)
 				{
 					bsdl = jc->devices_list[d].bsdl;
-					if ( bsdl )
+					if (bsdl)
 					{
-						switch ( jc->devices_list[d].scan_mode )
+						switch (jc->devices_list[d].scan_mode)
 						{
-							case JTAG_CORE_SAMPLE_SCANMODE:
-								for (i = 0; i < bsdl->number_of_bits_per_instruction; i++)
-								{
-									buf_out[(bsdl->number_of_bits_per_instruction - 1) - i] = bsdl->SAMPLE_Instruction[i] - '0';
-								}
+						case JTAG_CORE_SAMPLE_SCANMODE:
+							for (i = 0; i < bsdl->number_of_bits_per_instruction; i++)
+							{
+								buf_out[(bsdl->number_of_bits_per_instruction - 1) - i] = bsdl->SAMPLE_Instruction[i] - '0';
+							}
 							break;
-							case JTAG_CORE_EXTEST_SCANMODE:
-								for (i = 0; i < bsdl->number_of_bits_per_instruction; i++)
-								{
-									buf_out[(bsdl->number_of_bits_per_instruction - 1) - i] = bsdl->EXTEST_Instruction[i] - '0';
-								}
+						case JTAG_CORE_EXTEST_SCANMODE:
+							for (i = 0; i < bsdl->number_of_bits_per_instruction; i++)
+							{
+								buf_out[(bsdl->number_of_bits_per_instruction - 1) - i] = bsdl->EXTEST_Instruction[i] - '0';
+							}
 							break;
 						}
-
 
 						if (d == (jc->nb_of_devices_in_chain - 1)) // Last device in chain ?
 						{
@@ -932,7 +920,7 @@ int jtagcore_push_and_pop_chain(jtag_core * jc, int mode)
 					{
 						// Bypass
 						irlen = 3;
-						switch ( jc->nb_of_devices_in_chain )
+						switch (jc->nb_of_devices_in_chain)
 						{
 						case 1:
 							irlen = jc->total_IR_lenght;
@@ -940,7 +928,7 @@ int jtagcore_push_and_pop_chain(jtag_core * jc, int mode)
 						case 2:
 							if (d)
 							{
-								if ( jc->devices_list[0].bsdl )
+								if (jc->devices_list[0].bsdl)
 								{
 									bsdl = jc->devices_list[0].bsdl;
 									irlen = jc->total_IR_lenght - bsdl->number_of_bits_per_instruction;
@@ -948,7 +936,7 @@ int jtagcore_push_and_pop_chain(jtag_core * jc, int mode)
 							}
 							else
 							{
-								if ( jc->devices_list[1].bsdl )
+								if (jc->devices_list[1].bsdl)
 								{
 									bsdl = jc->devices_list[1].bsdl;
 									irlen = jc->total_IR_lenght - bsdl->number_of_bits_per_instruction;
@@ -1012,7 +1000,7 @@ jtag_error:
 	return JTAG_CORE_IO_ERROR;
 }
 
-int jtagcore_get_number_of_probes_drv(jtag_core * jc)
+int jtagcore_get_number_of_probes_drv(jtag_core *jc)
 {
 	int i;
 
@@ -1030,16 +1018,16 @@ int jtagcore_get_number_of_probes_drv(jtag_core * jc)
 	return JTAG_CORE_BAD_PARAMETER;
 }
 
-int jtagcore_get_number_of_probes(jtag_core * jc, int probe_driver_id)
+int jtagcore_get_number_of_probes(jtag_core *jc, int probe_driver_id)
 {
 	int totalprobe;
 
 	if (jc)
 	{
 		totalprobe = 0;
-		if( probe_driver_id < jtagcore_get_number_of_probes_drv(jc) && probe_driver_id >= 0 )
+		if (probe_driver_id < jtagcore_get_number_of_probes_drv(jc) && probe_driver_id >= 0)
 		{
-			if( staticdrvs[probe_driver_id].getinfosfunc(jc,staticdrvs[ probe_driver_id ].sub_drv_id, GET_DRV_DETECT, &totalprobe) == JTAG_CORE_NO_ERROR )
+			if (staticdrvs[probe_driver_id].getinfosfunc(jc, staticdrvs[probe_driver_id].sub_drv_id, GET_DRV_DETECT, &totalprobe) == JTAG_CORE_NO_ERROR)
 			{
 				return totalprobe;
 			}
@@ -1049,11 +1037,11 @@ int jtagcore_get_number_of_probes(jtag_core * jc, int probe_driver_id)
 	return JTAG_CORE_BAD_PARAMETER;
 }
 
-int jtagcore_get_probe_name(jtag_core * jc, int probe_id, char * name)
+int jtagcore_get_probe_name(jtag_core *jc, int probe_id, char *name)
 {
-	if ( ( probe_id >> 8 ) < jtagcore_get_number_of_probes_drv(jc) && probe_id >= 0 )
+	if ((probe_id >> 8) < jtagcore_get_number_of_probes_drv(jc) && probe_id >= 0)
 	{
-		staticdrvs[ probe_id>>8 ].getinfosfunc(jc, probe_id & 0xFF, GET_DRV_DESCRIPTION, name);
+		staticdrvs[probe_id >> 8].getinfosfunc(jc, probe_id & 0xFF, GET_DRV_DESCRIPTION, name);
 
 		return JTAG_CORE_NO_ERROR;
 	}
@@ -1061,9 +1049,9 @@ int jtagcore_get_probe_name(jtag_core * jc, int probe_id, char * name)
 	return JTAG_CORE_BAD_PARAMETER;
 }
 
-int jtagcore_select_and_open_probe(jtag_core * jc, int probe_id)
+int jtagcore_select_and_open_probe(jtag_core *jc, int probe_id)
 {
-	if ( ( probe_id >> 8 ) < jtagcore_get_number_of_probes_drv(jc) && probe_id >= 0 )
+	if ((probe_id >> 8) < jtagcore_get_number_of_probes_drv(jc) && probe_id >= 0)
 	{
 		return jtagcore_loaddriver(jc, probe_id, NULL);
 	}
@@ -1071,9 +1059,9 @@ int jtagcore_select_and_open_probe(jtag_core * jc, int probe_id)
 	return JTAG_CORE_BAD_PARAMETER;
 }
 
-int jtagcore_setEnvVar( jtag_core * jc, char * varname, char * varvalue )
+int jtagcore_setEnvVar(jtag_core *jc, char *varname, char *varvalue)
 {
-	if( setEnvVarDat( jc->envvar, varname, varvalue ) >= 0 )
+	if (setEnvVarDat(jc->envvar, varname, varvalue) >= 0)
 	{
 		return JTAG_CORE_NO_ERROR;
 	}
@@ -1083,26 +1071,26 @@ int jtagcore_setEnvVar( jtag_core * jc, char * varname, char * varvalue )
 	}
 }
 
-char * jtagcore_getEnvVar( jtag_core * jc, char * varname, char * varvalue)
+char *jtagcore_getEnvVar(jtag_core *jc, char *varname, char *varvalue)
 {
-	return getEnvVarDat( jc->envvar, varname, varvalue, 512 );
+	return getEnvVarDat(jc->envvar, varname, varvalue, 512);
 }
 
-char * jtagcore_getEnvVarIndex( jtag_core * jc, int index, char * varvalue)
+char *jtagcore_getEnvVarIndex(jtag_core *jc, int index, char *varvalue)
 {
-	return getEnvVarDatIndex( jc->envvar, index, varvalue, 512 );
+	return getEnvVarDatIndex(jc->envvar, index, varvalue, 512);
 }
 
-int jtagcore_getEnvVarValue( jtag_core * jc, char * varname)
+int jtagcore_getEnvVarValue(jtag_core *jc, char *varname)
 {
-	return getEnvVarValue( jc->envvar, varname);
+	return getEnvVarValue(jc->envvar, varname);
 }
 
-void jtagcore_deinit(jtag_core * jc)
+void jtagcore_deinit(jtag_core *jc)
 {
-	if( jc )
+	if (jc)
 	{
-		deinitEnv( (envvar_entry *)jc->envvar );
-		free( jc );
+		deinitEnv((envvar_entry *)jc->envvar);
+		free(jc);
 	}
 }

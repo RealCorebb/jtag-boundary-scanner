@@ -739,8 +739,8 @@ int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 						if (d == (jc->nb_of_devices_in_chain - 1)) // Last device in chain ?
 						{
 							jc->io_functions.drv_TXRX_DATA(jc, jc->devices_list[d].out_boundary_scan, jc->devices_list[d].in_boundary_scan, bsdl->number_of_chainbits - 1);
-							// buf_out[0] = jc->devices_list[d].out_boundary_scan[bsdl->number_of_chainbits - 1] | JTAG_STR_TMS;
-							// jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, &jc->devices_list[d].in_boundary_scan[bsdl->number_of_chainbits - 1], 1);
+							buf_out[0] = jc->devices_list[d].out_boundary_scan[bsdl->number_of_chainbits - 1] | JTAG_STR_TMS;
+							jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, &jc->devices_list[d].in_boundary_scan[bsdl->number_of_chainbits - 1], 1);
 						}
 						/* else
 						{
@@ -748,7 +748,7 @@ int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 						} */
 
 						// Check the incomming data
-						/* if (bsdl->number_of_chainbits)
+						if (bsdl->number_of_chainbits)
 						{
 							first_bit = jc->devices_list[d].in_boundary_scan[0];
 							bit = 0;
@@ -764,7 +764,7 @@ int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 								jtag_chain_check_needed |= 1;
 								jc->IR_filled = 0;
 							}
-						} */
+						}
 					}
 					else
 					{
@@ -792,7 +792,7 @@ int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 				}
 			}
 
-			/* if (!jc->IR_filled)
+			if (!jc->IR_filled)
 			{
 				jc->IR_filled = 1;
 				//  Exit1-DR -> Go to shift-IR
@@ -962,7 +962,7 @@ int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 						}
 					}
 				}
-			} */
+			}
 
 			// Return To idle
 			buf_out[0] = JTAG_STR_TMS;

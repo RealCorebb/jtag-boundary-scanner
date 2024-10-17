@@ -744,11 +744,11 @@ int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 						}
 						else
 						{
-							jc->io_functions.drv_TXRX_DATA(jc, jc->devices_list[d].out_boundary_scan, jc->devices_list[d].in_boundary_scan, bsdl->number_of_chainbits);
+							jc->io_functions.drv_TXRX_DATA(jc, jc->devices_list[d].out_boundary_scan, 0, bsdl->number_of_chainbits);
 						}
 
 						// Check the incomming data
-						/* if (bsdl->number_of_chainbits)
+						if (bsdl->number_of_chainbits)
 						{
 							first_bit = jc->devices_list[d].in_boundary_scan[0];
 							bit = 0;
@@ -764,7 +764,7 @@ int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 								jtag_chain_check_needed |= 1;
 								jc->IR_filled = 0;
 							}
-						} */
+						}
 					}
 					else
 					{

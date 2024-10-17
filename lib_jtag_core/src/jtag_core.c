@@ -748,7 +748,7 @@ int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 						}
 
 						// Check the incomming data
-						if (bsdl->number_of_chainbits)
+						/* if (bsdl->number_of_chainbits)
 						{
 							first_bit = jc->devices_list[d].in_boundary_scan[0];
 							bit = 0;
@@ -764,7 +764,7 @@ int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 								jtag_chain_check_needed |= 1;
 								jc->IR_filled = 0;
 							}
-						}
+						} */
 					}
 					else
 					{

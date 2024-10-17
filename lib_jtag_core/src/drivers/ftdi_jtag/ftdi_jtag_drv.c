@@ -818,7 +818,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *s
 				{
 					// Sleep(3);
 					status = pFT_GetQueueStatus(ftdih, &nbRead);
-				} while (status != FT_OK);
+				} while (nbRead < (unsigned long)(rounded_size >> 3));
 
 				status = pFT_Read(ftdih, &ftdi_in_buf, nbRead, &nbRead);
 

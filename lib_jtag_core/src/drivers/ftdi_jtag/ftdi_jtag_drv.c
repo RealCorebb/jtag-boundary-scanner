@@ -749,7 +749,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *s
 			if (opcode & OP_RD_TDO)
 			{
 				status = pFT_GetQueueStatus(ftdih, &nbRead);
-				while (status == FT_OK)
+				while (status != FT_OK)
 				{
 					// Sleep(3);
 					status = pFT_GetQueueStatus(ftdih, &nbRead);
@@ -818,7 +818,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *s
 				{
 					// Sleep(3);
 					status = pFT_GetQueueStatus(ftdih, &nbRead);
-				} while (status == FT_OK);
+				} while (status != FT_OK);
 
 				status = pFT_Read(ftdih, &ftdi_in_buf, nbRead, &nbRead);
 
@@ -875,7 +875,7 @@ int drv_FTDI_TDOTDI_xfer(jtag_core *jc, unsigned char *str_out, unsigned char *s
 				{
 					// Sleep(3);
 					status = pFT_GetQueueStatus(ftdih, &nbRead);
-				} while (status == FT_OK);
+				} while (status != FT_OK);
 
 				status = pFT_Read(ftdih, &ftdi_in_buf, nbRead, &nbRead);
 

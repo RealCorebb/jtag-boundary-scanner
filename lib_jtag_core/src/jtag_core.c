@@ -965,7 +965,7 @@ int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 			}
 
 			// Return To idle
-			buf_out[0] = JTAG_STR_TMS;
+			/* buf_out[0] = JTAG_STR_TMS;
 			buf_out[1] = 0x00;
 			buf_out[2] = 0x00;
 			buf_out[3] = 0x00;
@@ -973,7 +973,7 @@ int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 			buf_out[5] = 0x00;
 			buf_out[6] = 0x00;
 			buf_out[7] = 0x00;
-			jc->io_functions.drv_TX_TMS(jc, (unsigned char *)&buf_out, 6);
+			jc->io_functions.drv_TX_TMS(jc, (unsigned char *)&buf_out, 6); */
 
 			return JTAG_CORE_NO_ERROR;
 		}

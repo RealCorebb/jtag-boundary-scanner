@@ -249,7 +249,7 @@ static int ft2232h_enable_rtck(int enable)
 
 int drv_FTDI_Detect(jtag_core *jc)
 {
-	int numDevs, i;
+	int numDevs, i, validDevs = 0;
 	FT_STATUS status;
 	char SerialNumber[512];
 
@@ -263,41 +263,40 @@ int drv_FTDI_Detect(jtag_core *jc)
 			return 0;
 
 		status = pFT_ListDevices(&numDevs, NULL, FT_LIST_NUMBER_ONLY);
-		if (status != FT_OK && !numDevs)
+		if (status != FT_OK || numDevs == 0)
 		{
 			jtagcore_logs_printf(jc, MSG_ERROR, "pFT_ListDevices : Error %x !\r\n", status);
 			return 0;
 		}
 
-		i = 0;
-		while (i < numDevs && i < MAX_PROBES_FTDI)
+		for (i = 0; i < numDevs && i < MAX_PROBES_FTDI; i++)
 		{
 			status = pFT_ListDevices((LPVOID)(MACH_WORD)i, SerialNumber, FT_LIST_BY_INDEX | FT_OPEN_BY_DESCRIPTION);
 			if (status != FT_OK)
 			{
-				jtagcore_logs_printf(jc, MSG_ERROR, "pFT_ListDevices : Error %x !\r\n", status);
-				return 0;
+				jtagcore_logs_printf(jc, MSG_ERROR, "pFT_ListDevices : Error %x at index %d !\r\n", status, i);
+				continue; // Skip this device and try the next one
 			}
 
-			strcpy(subdrv_list[i].drv_id, SerialNumber);
-			strcpy(subdrv_list[i].drv_desc, SerialNumber);
-			strcat(subdrv_list[i].drv_desc, " ");
+			strcpy(subdrv_list[validDevs].drv_id, SerialNumber);
+			strcpy(subdrv_list[validDevs].drv_desc, SerialNumber);
+			strcat(subdrv_list[validDevs].drv_desc, " ");
 
 			status = pFT_ListDevices((LPVOID)(MACH_WORD)i, SerialNumber, FT_LIST_BY_INDEX | FT_OPEN_BY_SERIAL_NUMBER);
 			if (status != FT_OK)
 			{
-				jtagcore_logs_printf(jc, MSG_ERROR, "pFT_ListDevices : Error %x !\r\n", status);
-				return 0;
+				jtagcore_logs_printf(jc, MSG_ERROR, "pFT_ListDevices : Error %x at index %d !\r\n", status, i);
+				continue; // Skip this device and try the next one
 			}
 
-			strcat(subdrv_list[i].drv_desc, SerialNumber);
+			strcat(subdrv_list[validDevs].drv_desc, SerialNumber);
 
-			i++;
+			validDevs++; // Increment only for successfully detected devices
 		}
 
-		jtagcore_logs_printf(jc, MSG_INFO_1, "drv_FTDI_Detect : %d interface(s) found !\r\n", numDevs);
+		jtagcore_logs_printf(jc, MSG_INFO_1, "drv_FTDI_Detect : %d valid interface(s) found !\r\n", validDevs);
 
-		return numDevs;
+		return validDevs;
 	}
 	else
 	{

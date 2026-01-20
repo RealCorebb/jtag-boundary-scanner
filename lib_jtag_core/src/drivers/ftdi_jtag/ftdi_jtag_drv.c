@@ -577,7 +577,7 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	}
 
 	high_direction = 0x00;
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < 8; i++)
 	{
 		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DIR_ACBUS%d", i);
 		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
@@ -587,7 +587,7 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	}
 
 	high_output = 0x00;
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < 8; i++)
 	{
 		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DEFAULT_STATE_ACBUS%d", i);
 		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
@@ -597,7 +597,7 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	}
 
 	high_polarity = 0x00;
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < 8; i++)
 	{
 		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_POLARITY_ACBUS%d", i);
 		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)

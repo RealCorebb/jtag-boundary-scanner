@@ -22,7 +22,7 @@
 # 4 : Error level messages
 # 5 : No log / no message
 
-set LOG_MESSAGES_FILTER_LEVEL 1
+set LOG_MESSAGES_FILTER_LEVEL 0
 
 # Log file
 

@@ -692,8 +692,8 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	update_gpio_state(12, 0);
 	update_gpio_state(13, 0);
 	update_gpio_state(14, 0);
-	update_gpio_state(15, 1);
-	
+	update_gpio_state(15, 0);
+
 	ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 	ft2232_set_data_bits_high_byte((unsigned char)(high_output ^ high_polarity), high_direction);
 

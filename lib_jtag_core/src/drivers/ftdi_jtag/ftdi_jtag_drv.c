@@ -685,14 +685,15 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 
 	jtagcore_logs_printf(jc, MSG_INFO_0, "drv_FTDI_Init : Probe Driver loaded successfully...\r\n");
 
-	update_gpio_state(8, 0);
-	update_gpio_state(9, 0);
-	update_gpio_state(10, 0);
-	update_gpio_state(11, 0);
-	update_gpio_state(12, 0);
-	update_gpio_state(13, 0);
-	update_gpio_state(14, 0);
-	update_gpio_state(15, 0);
+	update_gpio_state(4, 1);
+	update_gpio_state(8, 1);
+	update_gpio_state(9, 1);
+	update_gpio_state(10, 1);
+	update_gpio_state(11, 1);
+	update_gpio_state(12, 1);
+	update_gpio_state(13, 1);
+	update_gpio_state(14, 1);
+	update_gpio_state(15, 1);
 
 	ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 	ft2232_set_data_bits_high_byte((unsigned char)(high_output ^ high_polarity), high_direction);

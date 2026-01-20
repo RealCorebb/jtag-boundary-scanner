@@ -106,7 +106,7 @@ set PROBE_FTDI_SET_PIN_DIR_ADBUS7             0 # RTCK -> in
 
 set PROBE_FTDI_SET_PIN_DIR_ACBUS0             1
 set PROBE_FTDI_SET_PIN_DIR_ACBUS1             1
-set PROBE_FTDI_SET_PIN_DIR_ACBUS2             1able -> out
+set PROBE_FTDI_SET_PIN_DIR_ACBUS2             1
 set PROBE_FTDI_SET_PIN_DIR_ACBUS3             1
 set PROBE_FTDI_SET_PIN_DIR_ACBUS4             1
 set PROBE_FTDI_SET_PIN_DIR_ACBUS5             1

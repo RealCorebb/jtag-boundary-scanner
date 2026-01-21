@@ -100,7 +100,7 @@ set PROBE_FTDI_SET_PIN_DIR_ADBUS1             1 # TDI -> out
 set PROBE_FTDI_SET_PIN_DIR_ADBUS2             0 # TDO -> in
 set PROBE_FTDI_SET_PIN_DIR_ADBUS3             1 # TMS -> out
 set PROBE_FTDI_SET_PIN_DIR_ADBUS4             1 # Buffers enable -> out
-set PROBE_FTDI_SET_PIN_DIR_ADBUS5             0 # Target presence : 0 if target present -> in
+set PROBE_FTDI_SET_PIN_DIR_ADBUS5             1 # Target presence : 0 if target present -> in
 set PROBE_FTDI_SET_PIN_DIR_ADBUS6             0 # TSRST -> in
 set PROBE_FTDI_SET_PIN_DIR_ADBUS7             0 # RTCK -> in
 

@@ -345,18 +345,18 @@ static void bsi_send_byte_with_trigger(jtag_core *jc, uint8_t byte)
 
     // 2. 产生 GPIOL0 (ADBUS4) 的上升沿
     // 先拉低触发引脚 (ADBUS4 对应 bit 4)
-    low_output &= ~(1 << 4); 
+	update_gpio_state(4, 0);
     ft2232_set_data_bits_low_byte(low_output, low_direction);
 
 	Sleep(100);
 
     // 再拉高触发引脚，产生上升沿使 CPLD 采样数据
-    low_output |= (1 << 4);
+   	update_gpio_state(4, 1);
     ft2232_set_data_bits_low_byte(low_output, low_direction);
 
 	// 再拉回低
 	Sleep(100);
-	low_output &= ~(1 << 4); 
+	update_gpio_state(4, 0);
     ft2232_set_data_bits_low_byte(low_output, low_direction);
 }
 
@@ -365,6 +365,9 @@ static void bsi_send_byte_with_trigger(jtag_core *jc, uint8_t byte)
  */
 static void bsi_send_frame(jtag_core *jc, uint8_t cmd, uint8_t d1, uint8_t d2, uint8_t d3, uint8_t d4)
 {
+	update_gpio_state(5, 0);
+	ft2232_set_data_bits_low_byte(low_output, low_direction);
+	Sleep(100);
     uint8_t frame[8];
     
     frame[0] = 0x55; // 起始帧 
@@ -382,6 +385,9 @@ static void bsi_send_frame(jtag_core *jc, uint8_t cmd, uint8_t d1, uint8_t d2, u
     {
         bsi_send_byte_with_trigger(jc, frame[i]);
     }
+	Sleep(100);
+	update_gpio_state(5, 1);
+	ft2232_set_data_bits_low_byte(low_output, low_direction);
 }
 
 // --- 业务功能接口 ---

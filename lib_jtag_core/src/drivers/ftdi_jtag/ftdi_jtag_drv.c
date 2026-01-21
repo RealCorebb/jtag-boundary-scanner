@@ -339,25 +339,25 @@ static void bsi_send_byte_with_trigger(jtag_core *jc, uint8_t byte)
 {
     // 1. 将 8bit 数据输出到 ACBUS (GPIOH0-7)
     high_output = byte;
-    ft2232_set_data_bits_high_byte(high_output, high_direction);
+    ft2232_set_data_bits_high_byte((unsigned char)(high_output ^ high_polarity), high_direction);
 
 	Sleep(100);
 
     // 2. 产生 GPIOL0 (ADBUS4) 的上升沿
     // 先拉低触发引脚 (ADBUS4 对应 bit 4)
 	update_gpio_state(4, 0);
-    ft2232_set_data_bits_low_byte(low_output, low_direction);
+    ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 
 	Sleep(100);
 
     // 再拉高触发引脚，产生上升沿使 CPLD 采样数据
    	update_gpio_state(4, 1);
-    ft2232_set_data_bits_low_byte(low_output, low_direction);
+    ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 
 	// 再拉回低
 	Sleep(300);
 	update_gpio_state(4, 0);
-    ft2232_set_data_bits_low_byte(low_output, low_direction);
+    ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 }
 
 /**

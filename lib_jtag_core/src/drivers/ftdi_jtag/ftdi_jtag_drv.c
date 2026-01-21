@@ -355,7 +355,7 @@ static void bsi_send_byte_with_trigger(jtag_core *jc, uint8_t byte)
     ft2232_set_data_bits_low_byte(low_output, low_direction);
 
 	// 再拉回低
-	Sleep(100);
+	Sleep(300);
 	update_gpio_state(4, 0);
     ft2232_set_data_bits_low_byte(low_output, low_direction);
 }

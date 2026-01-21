@@ -327,6 +327,93 @@ void update_gpio_state(int index, int state)
 	}
 }
 
+
+
+
+
+
+/**
+ * @brief 发送单个字节并产生 GPIOL0 (ADBUS4) 上升沿触发信号
+ */
+static void bsi_send_byte_with_trigger(jtag_core *jc, uint8_t byte)
+{
+    // 1. 将 8bit 数据输出到 ACBUS (GPIOH0-7)
+    high_output = byte;
+    ft2232_set_data_bits_high_byte(high_output, high_direction);
+
+    // 2. 产生 GPIOL0 (ADBUS4) 的上升沿
+    // 先拉低触发引脚 (ADBUS4 对应 bit 4)
+    low_output &= ~(1 << 4); 
+    ft2232_set_data_bits_low_byte(low_output, low_direction);
+
+    // 再拉高触发引脚，产生上升沿使 CPLD 采样数据
+    low_output |= (1 << 4);
+    ft2232_set_data_bits_low_byte(low_output, low_direction);
+}
+
+/**
+ * @brief 按照 BSI 协议格式发送一帧 64bit (8 Bytes) 数据
+ */
+static void bsi_send_frame(jtag_core *jc, uint8_t cmd, uint8_t d1, uint8_t d2, uint8_t d3, uint8_t d4)
+{
+    uint8_t frame[8];
+    
+    frame[0] = 0x55; // 起始帧 
+    frame[1] = cmd;  // 命令帧
+    frame[2] = d1;   // 数据1
+    frame[3] = d2;   // 数据2
+    frame[4] = d3;   // 数据3
+    frame[5] = d4;   // 数据4
+    // 校验帧 = 命令帧 ^ 数据1 ^ 数据2 ^ 数据3 ^ 数据4 
+    frame[6] = cmd ^ d1 ^ d2 ^ d3 ^ d4; 
+    frame[7] = 0xAA; // 结束帧 
+
+    // 循环发送 8 个字节，每次发送都会触发一次上升沿 
+    for (int i = 0; i < 8; i++)
+    {
+        bsi_send_byte_with_trigger(jc, frame[i]);
+    }
+}
+
+// --- 业务功能接口 ---
+
+/**
+ * @brief DAC 电压设置 (0x01)
+ * @param dac_word 16位DAC配置数据 (DATAH 和 DATAL)
+ */
+void bsi_set_voltage(jtag_core *jc, uint16_t dac_word)
+{
+    uint8_t data_h = (uint8_t)((dac_word >> 8) & 0xFF);
+    uint8_t data_l = (uint8_t)(dac_word & 0xFF);
+    bsi_send_frame(jc, 0x01, 0x00, 0x00, data_h, data_l); // [cite: 178]
+}
+
+/**
+ * @brief 通道使能开关 (A通道: 0x02, B通道: 0x03)
+ * @param channel 0 为 A 通道, 1 为 B 通道
+ * @param enable  1 为闭合(使能), 0 为断开
+ */
+void bsi_set_channel(jtag_core *jc, int channel, int enable)
+{
+    uint8_t cmd = (channel == 0) ? 0x02 : 0x03;
+    uint8_t en_val = enable ? 0x01 : 0x00;
+    bsi_send_frame(jc, cmd, 0x00, 0x00, 0x00, en_val); // [cite: 180, 182]
+}
+
+/**
+ * @brief 系统复位 (0x00)
+ */
+void bsi_reset(jtag_core *jc)
+{
+    bsi_send_frame(jc, 0x00, 0x00, 0x00, 0x00, 0x00); // 
+}
+
+
+
+
+
+
+
 int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 {
 	FT_STATUS status;
@@ -685,7 +772,6 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 
 	jtagcore_logs_printf(jc, MSG_INFO_0, "drv_FTDI_Init : Probe Driver loaded successfully...\r\n");
 
-	update_gpio_state(4, 1);
 	update_gpio_state(8, 1);
 	update_gpio_state(9, 1);
 	update_gpio_state(10, 1);
@@ -697,6 +783,20 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 
 	ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 	ft2232_set_data_bits_high_byte((unsigned char)(high_output ^ high_polarity), high_direction);
+
+	Sleep(3000);
+	bsi_reset(jc);
+	Sleep(1000);
+	// 设置电压为 3.3V (对应 DAC 十六进制值 0x0A80)
+	bsi_set_voltage(jc, 0x0A80);
+	Sleep(1000);
+	bsi_set_channel(jc, 0, 1); // 使能 A 通道
+	Sleep(1000);
+	bsi_set_channel(jc, 1, 1);
+	Sleep(1000);
+	bsi_set_channel(jc, 0, 0);
+	Sleep(1000);
+	bsi_set_channel(jc, 1, 0);
 
 	return 0;
 

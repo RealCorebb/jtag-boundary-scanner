@@ -330,7 +330,13 @@ void update_gpio_state(int index, int state)
 
 
 
-
+// 位反转函数：将 01010101 这种顺序彻底颠倒
+static uint8_t reverse_bits(uint8_t b) {
+    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+    return b;
+}
 
 /**
  * @brief 发送单个字节并产生 GPIOL0 (ADBUS4) 上升沿触发信号
@@ -338,8 +344,9 @@ void update_gpio_state(int index, int state)
 static void bsi_send_byte_with_trigger(jtag_core *jc, uint8_t byte)
 {
     // 1. 将 8bit 数据输出到 ACBUS (GPIOH0-7)
-    high_output = byte;
-    ft2232_set_data_bits_high_byte((unsigned char)(high_output ^ high_polarity), high_direction);
+	uint8_t reversed_byte = reverse_bits(byte);
+    high_output = reversed_byte;
+    ft2232_set_data_bits_high_byte(high_output, high_direction);
 
 	Sleep(100);
 

@@ -345,7 +345,8 @@ static void bsi_send_byte_with_trigger(jtag_core *jc, uint8_t byte)
 {
     // 1. 将 8bit 数据输出到 ACBUS (GPIOH0-7)
 	uint8_t reversed_byte = reverse_bits(byte);
-    high_output = reversed_byte;
+    //high_output = reversed_byte;
+	high_output = byte;
     ft2232_set_data_bits_high_byte(high_output, high_direction);
 
 	Sleep(100);

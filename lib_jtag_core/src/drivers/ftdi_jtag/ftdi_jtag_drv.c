@@ -824,19 +824,27 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 	ft2232_set_data_bits_high_byte((unsigned char)(high_output ^ high_polarity), high_direction);
 
-	Sleep(1000);
-	//bsi_reset(jc);
-	//Sleep(500);
-	bsi_set_channel(jc, 0, 1); // 使能 A 通道
-	Sleep(500);
+	Sleep(100);
+	bsi_reset(jc);
+	Sleep(100);
 	// 设置电压为 3.3V (对应 DAC 十六进制值 0x0A80)
 	bsi_set_voltage(jc, 0x0A80);
-	Sleep(500);
+	Sleep(100);
+	bsi_set_channel(jc, 0, 1); // 使能 A 通道
+	Sleep(100);
 	bsi_set_channel(jc, 1, 1);
 	Sleep(500);
-	bsi_set_channel(jc, 0, 0); // 不使能 A 通道
+	bsi_set_channel(jc, 0, 0); // 不使能
+	Sleep(100);
+	bsi_set_channel(jc, 1, 0); // 不使能
 	Sleep(500);
-	bsi_set_channel(jc, 1, 0); // 不使能 A 通道
+	bsi_set_channel(jc, 0, 1); // 使能 A 通道
+	Sleep(100);
+	bsi_set_channel(jc, 1, 1);
+	Sleep(500);
+	bsi_set_channel(jc, 0, 0); // 不使能
+	Sleep(100);
+	bsi_set_channel(jc, 1, 0); // 不使能
 	Sleep(500);
 
 	return 0;

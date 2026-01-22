@@ -419,11 +419,18 @@ static void bsi_send_frame(jtag_core *jc, uint8_t cmd, uint8_t d1, uint8_t d2, u
  * @brief DAC 电压设置 (0x01)
  * @param dac_word 16位DAC配置数据 (DATAH 和 DATAL)
  */
-void bsi_set_voltage(jtag_core *jc, uint16_t dac_word)
+void bsi_set_voltage(jtag_core *jc, uint8_t channel, uint16_t dac_word)
 {
-    // Format: [A1=0][A0=0][PD=1][LDAC=0][D11:D0]
-    // Shift the 12-bit DAC word and set PD bit (bit 13)
-    uint16_t formatted_word = ((dac_word & 0x0FFF) | 0x2000);
+    // Format: [A1][A0][PD=1][LDAC=0][D11:D0]
+    // channel: 0=DAC A, 1=DAC B, 2=DAC C, 3=DAC D
+    // A1 and A0 select the channel (bits 15-14)
+    // PD=1 for normal operation (bit 13)
+    // LDAC=0 (bit 12)
+    // D11:D0 is the 12-bit DAC value (bits 11-0)
+    
+    uint16_t formatted_word = ((channel & 0x03) << 14) | // A1, A0 at bits 15-14
+                              (1 << 13) |                 // PD=1 at bit 13
+                              (dac_word & 0x0FFF);        // 12-bit DAC data
     
     uint8_t data_h = (uint8_t)((formatted_word >> 8) & 0xFF);
     uint8_t data_l = (uint8_t)(formatted_word & 0xFF);
@@ -833,7 +840,13 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	bsi_reset(jc);
 	Sleep(10);
 	// 设置电压为 3.3V (对应 DAC 十六进制值 0x0A80)
-	bsi_set_voltage(jc, 0x0A80);
+	bsi_set_voltage(jc, 0, 0x0A80);  // DAC A -> sends 0x2A80
+	Sleep(10);
+	bsi_set_voltage(jc, 1, 0x0A80);  // DAC B -> sends 0x6A80
+	Sleep(10);
+	bsi_set_voltage(jc, 2, 0x0A80);  // DAC C -> sends 0xAA80
+	Sleep(10);
+	bsi_set_voltage(jc, 3, 0x0A80);  // DAC D -> sends 0xEA80
 	Sleep(10);
 	bsi_set_channel(jc, 0, 1); // 使能 A 通道
 	Sleep(10);

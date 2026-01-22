@@ -391,6 +391,16 @@ static void bsi_send_frame(jtag_core *jc, uint8_t cmd, uint8_t d1, uint8_t d2, u
     frame[6] = cmd ^ d1 ^ d2 ^ d3 ^ d4; 
     frame[7] = 0xAA; // 结束帧 
 
+    // 将 frame 内容输出到 log.txt
+    FILE *fp = fopen("log.txt", "a");
+    if (fp != NULL)
+    {
+        fprintf(fp, "%02X %02X %02X %02X %02X %02X %02X %02X\n",
+                frame[0], frame[1], frame[2], frame[3],
+                frame[4], frame[5], frame[6], frame[7]);
+        fclose(fp);
+    }
+
     // 循环发送 8 个字节，每次发送都会触发一次上升沿 
     for (int i = 0; i < 8; i++)
     {

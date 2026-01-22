@@ -421,9 +421,14 @@ static void bsi_send_frame(jtag_core *jc, uint8_t cmd, uint8_t d1, uint8_t d2, u
  */
 void bsi_set_voltage(jtag_core *jc, uint16_t dac_word)
 {
-    uint8_t data_h = (uint8_t)((dac_word >> 8) & 0xFF);
-    uint8_t data_l = (uint8_t)(dac_word & 0xFF);
-    bsi_send_frame(jc, 0x01, 0x00, 0x00, data_h, data_l); // [cite: 178]
+    // Format: [A1=0][A0=0][PD=1][LDAC=0][D11:D0]
+    // Shift the 12-bit DAC word and set PD bit (bit 13)
+    uint16_t formatted_word = ((dac_word & 0x0FFF) | 0x2000);
+    
+    uint8_t data_h = (uint8_t)((formatted_word >> 8) & 0xFF);
+    uint8_t data_l = (uint8_t)(formatted_word & 0xFF);
+    
+    bsi_send_frame(jc, 0x01, 0x00, 0x00, data_h, data_l);
 }
 
 /**

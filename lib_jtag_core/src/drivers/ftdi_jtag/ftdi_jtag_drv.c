@@ -798,6 +798,8 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 
 	jtagcore_logs_printf(jc, MSG_INFO_0, "drv_FTDI_Init : Probe Driver loaded successfully...\r\n");
 
+	update_gpio_state(4, 1);
+	update_gpio_state(5, 1);
 	update_gpio_state(8, 1);
 	update_gpio_state(9, 1);
 	update_gpio_state(10, 1);
@@ -811,18 +813,12 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	ft2232_set_data_bits_high_byte((unsigned char)(high_output ^ high_polarity), high_direction);
 
 	Sleep(1000);
-	bsi_reset(jc);
-	Sleep(500);
+	//bsi_reset(jc);
+	//Sleep(500);
 	// 设置电压为 3.3V (对应 DAC 十六进制值 0x0A80)
 	bsi_set_voltage(jc, 0x0A80);
 	Sleep(500);
-	bsi_set_voltage(jc, 0x0A80);
-	Sleep(500);
 	bsi_set_channel(jc, 0, 1); // 使能 A 通道
-	Sleep(500);
-	bsi_set_channel(jc, 0, 1); // 使能 A 通道
-	Sleep(500);
-	bsi_set_channel(jc, 1, 1);
 	Sleep(500);
 	bsi_set_channel(jc, 1, 1);
 

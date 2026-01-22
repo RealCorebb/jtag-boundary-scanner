@@ -101,8 +101,8 @@ set PROBE_FTDI_SET_PIN_DIR_ADBUS2             0 # TDO -> in
 set PROBE_FTDI_SET_PIN_DIR_ADBUS3             1 # TMS -> out
 set PROBE_FTDI_SET_PIN_DIR_ADBUS4             1 # Buffers enable -> out
 set PROBE_FTDI_SET_PIN_DIR_ADBUS5             1 # Target presence : 0 if target present -> in
-set PROBE_FTDI_SET_PIN_DIR_ADBUS6             0 # TSRST -> in
-set PROBE_FTDI_SET_PIN_DIR_ADBUS7             0 # RTCK -> in
+set PROBE_FTDI_SET_PIN_DIR_ADBUS6             1 # TSRST -> in
+set PROBE_FTDI_SET_PIN_DIR_ADBUS7             1 # RTCK -> in
 
 set PROBE_FTDI_SET_PIN_DIR_ACBUS0             1
 set PROBE_FTDI_SET_PIN_DIR_ACBUS1             1
@@ -168,13 +168,13 @@ set PROBE_FTDI_SET_PIN_POLARITY_ACBUS7        0
 # Set to -1 when not available/used.
 #
 
-set PROBE_FTDI_SET_TRST_OE_PINNUM             10
-set PROBE_FTDI_SET_TRST_STATE_PINNUM          8
+set PROBE_FTDI_SET_TRST_OE_PINNUM             -1
+set PROBE_FTDI_SET_TRST_STATE_PINNUM          -1
 
 set PROBE_FTDI_SET_SRST_OE_PINNUM             -1
 set PROBE_FTDI_SET_SRST_STATE_PINNUM          -1
 
-set PROBE_FTDI_SET_CONNECTION_LED_PINNUM      11
+set PROBE_FTDI_SET_CONNECTION_LED_PINNUM      -1
 
 set PROBE_FTDI_JTAG_TRST_DELAY_MS             200
 

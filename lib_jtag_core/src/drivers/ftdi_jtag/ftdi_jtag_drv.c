@@ -348,26 +348,22 @@ static void bsi_send_byte_with_trigger(jtag_core *jc, uint8_t byte)
 	//翻转
 	//uint8_t reversed_byte = reverse_bits(byte);
     //high_output = reversed_byte;
+
+	// 2. 产生 GPIOL0 (ADBUS4) 的上升沿
+    // 先拉低触发引脚 (ADBUS4 对应 bit 4)
+	update_gpio_state(4, 0);
+    ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
+
+	Sleep(100);
 	
 	high_output = byte;
     ft2232_set_data_bits_high_byte(high_output, high_direction);
 
 	Sleep(100);
 
-    // 2. 产生 GPIOL0 (ADBUS4) 的上升沿
-    // 先拉低触发引脚 (ADBUS4 对应 bit 4)
-	update_gpio_state(4, 0);
-    ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
-
-	Sleep(100);
 
     // 再拉高触发引脚，产生上升沿使 CPLD 采样数据
    	update_gpio_state(4, 1);
-    ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
-
-	// 再拉回低
-	Sleep(300);
-	update_gpio_state(4, 0);
     ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 }
 
@@ -376,6 +372,9 @@ static void bsi_send_byte_with_trigger(jtag_core *jc, uint8_t byte)
  */
 static void bsi_send_frame(jtag_core *jc, uint8_t cmd, uint8_t d1, uint8_t d2, uint8_t d3, uint8_t d4)
 {
+	update_gpio_state(4, 1);
+    ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
+	Sleep(100);
 	update_gpio_state(5, 0);
 	ft2232_set_data_bits_low_byte(low_output, low_direction);
 	Sleep(100);
@@ -406,6 +405,9 @@ static void bsi_send_frame(jtag_core *jc, uint8_t cmd, uint8_t d1, uint8_t d2, u
     {
         bsi_send_byte_with_trigger(jc, frame[i]);
     }
+	Sleep(100);
+	update_gpio_state(4, 0);
+    ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 	Sleep(100);
 	update_gpio_state(5, 1);
 	ft2232_set_data_bits_low_byte(low_output, low_direction);
@@ -808,27 +810,27 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 
 	jtagcore_logs_printf(jc, MSG_INFO_0, "drv_FTDI_Init : Probe Driver loaded successfully...\r\n");
 
-	update_gpio_state(4, 1);
+	update_gpio_state(4, 0);
 	update_gpio_state(5, 1);
-	update_gpio_state(8, 1);
-	update_gpio_state(9, 1);
-	update_gpio_state(10, 1);
-	update_gpio_state(11, 1);
-	update_gpio_state(12, 1);
-	update_gpio_state(13, 1);
-	update_gpio_state(14, 1);
-	update_gpio_state(15, 1);
+	update_gpio_state(8, 0);
+	update_gpio_state(9, 0);
+	update_gpio_state(10, 0);
+	update_gpio_state(11, 0);
+	update_gpio_state(12, 0);
+	update_gpio_state(13, 0);
+	update_gpio_state(14, 0);
+	update_gpio_state(15, 0);
 
 	ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 	ft2232_set_data_bits_high_byte((unsigned char)(high_output ^ high_polarity), high_direction);
 
-	Sleep(3000);
+	Sleep(2000);
 	//bsi_reset(jc);
 	//Sleep(500);
 	// 设置电压为 3.3V (对应 DAC 十六进制值 0x0A80)
-	bsi_set_voltage(jc, 0x0A80);
-	Sleep(500);
 	bsi_set_channel(jc, 0, 1); // 使能 A 通道
+	Sleep(500);
+	bsi_set_voltage(jc, 0x0A80);
 	Sleep(500);
 	bsi_set_channel(jc, 1, 1);
 

@@ -354,12 +354,12 @@ static void bsi_send_byte_with_trigger(jtag_core *jc, uint8_t byte)
 	update_gpio_state(4, 0);
     ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 
-	Sleep(100);
+	Sleep(10);
 	
 	high_output = byte;
     ft2232_set_data_bits_high_byte(high_output, high_direction);
 
-	Sleep(100);
+	Sleep(10);
 
 
     // 再拉高触发引脚，产生上升沿使 CPLD 采样数据
@@ -374,10 +374,10 @@ static void bsi_send_frame(jtag_core *jc, uint8_t cmd, uint8_t d1, uint8_t d2, u
 {
 	update_gpio_state(4, 1);
     ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
-	Sleep(100);
+	Sleep(10);
 	update_gpio_state(5, 0);
 	ft2232_set_data_bits_low_byte(low_output, low_direction);
-	Sleep(100);
+	Sleep(10);
     uint8_t frame[8];
     
     frame[0] = 0x55; // 起始帧 
@@ -405,10 +405,10 @@ static void bsi_send_frame(jtag_core *jc, uint8_t cmd, uint8_t d1, uint8_t d2, u
     {
         bsi_send_byte_with_trigger(jc, frame[i]);
     }
-	Sleep(100);
+	Sleep(10);
 	update_gpio_state(4, 0);
     ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
-	Sleep(100);
+	Sleep(10);
 	update_gpio_state(5, 1);
 	ft2232_set_data_bits_low_byte(low_output, low_direction);
 }
@@ -824,26 +824,26 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 	ft2232_set_data_bits_high_byte((unsigned char)(high_output ^ high_polarity), high_direction);
 
-	Sleep(100);
+	Sleep(10);
 	bsi_reset(jc);
-	Sleep(100);
+	Sleep(10);
 	// 设置电压为 3.3V (对应 DAC 十六进制值 0x0A80)
 	bsi_set_voltage(jc, 0x0A80);
-	Sleep(100);
+	Sleep(10);
 	bsi_set_channel(jc, 0, 1); // 使能 A 通道
-	Sleep(100);
+	Sleep(10);
 	bsi_set_channel(jc, 1, 1);
 	Sleep(500);
 	bsi_set_channel(jc, 0, 0); // 不使能
-	Sleep(100);
+	Sleep(10);
 	bsi_set_channel(jc, 1, 0); // 不使能
 	Sleep(500);
 	bsi_set_channel(jc, 0, 1); // 使能 A 通道
-	Sleep(100);
+	Sleep(10);
 	bsi_set_channel(jc, 1, 1);
 	Sleep(500);
 	bsi_set_channel(jc, 0, 0); // 不使能
-	Sleep(100);
+	Sleep(10);
 	bsi_set_channel(jc, 1, 0); // 不使能
 	Sleep(500);
 

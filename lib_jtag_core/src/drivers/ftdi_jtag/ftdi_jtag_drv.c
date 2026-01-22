@@ -346,10 +346,10 @@ static void bsi_send_byte_with_trigger(jtag_core *jc, uint8_t byte)
     // 1. 将 8bit 数据输出到 ACBUS (GPIOH0-7)
 
 	//翻转
-	uint8_t reversed_byte = reverse_bits(byte);
-    high_output = reversed_byte;
+	//uint8_t reversed_byte = reverse_bits(byte);
+    //high_output = reversed_byte;
 	
-	//high_output = byte;
+	high_output = byte;
     ft2232_set_data_bits_high_byte(high_output, high_direction);
 
 	Sleep(100);
@@ -822,7 +822,7 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 	ft2232_set_data_bits_high_byte((unsigned char)(high_output ^ high_polarity), high_direction);
 
-	Sleep(1000);
+	Sleep(3000);
 	//bsi_reset(jc);
 	//Sleep(500);
 	// 设置电压为 3.3V (对应 DAC 十六进制值 0x0A80)

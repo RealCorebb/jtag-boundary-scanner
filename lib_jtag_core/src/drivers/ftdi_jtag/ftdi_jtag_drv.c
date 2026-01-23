@@ -851,20 +851,6 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	bsi_set_channel(jc, 0, 1); // 使能 A 通道
 	Sleep(10);
 	bsi_set_channel(jc, 1, 1);
-	Sleep(500);
-	bsi_set_channel(jc, 0, 0); // 不使能
-	Sleep(10);
-	bsi_set_channel(jc, 1, 0); // 不使能
-	Sleep(500);
-	bsi_set_channel(jc, 0, 1); // 使能 A 通道
-	Sleep(10);
-	bsi_set_channel(jc, 1, 1);
-	Sleep(500);
-	bsi_set_channel(jc, 0, 0); // 不使能
-	Sleep(10);
-	bsi_set_channel(jc, 1, 0); // 不使能
-	Sleep(500);
-
 	return 0;
 
 loadliberror:

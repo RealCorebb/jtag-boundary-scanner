@@ -1088,6 +1088,12 @@ int jtagcore_getEnvVarValue(jtag_core *jc, char *varname)
 
 void jtagcore_deinit(jtag_core *jc)
 {
+	FILE *fp = fopen("log.txt", "a");
+    if (fp != NULL)
+    {
+		fprintf(fp, "------------------drv_FTDI_DeInit From Core------------------\n");
+        fclose(fp);
+    }
 	if (jc)
 	{
 		deinitEnv((envvar_entry *)jc->envvar);

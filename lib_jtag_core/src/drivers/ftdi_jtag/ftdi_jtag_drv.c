@@ -861,7 +861,7 @@ loadliberror:
 
 int drv_FTDI_DeInit(jtag_core *jc)
 {
-	bsi_set_channel(jc, 0, 1); // 不使能 A 通道
+	bsi_set_channel(jc, 0, 0); // 不使能 A 通道
 	Sleep(10);
 	bsi_set_channel(jc, 1, 0);
 	pFT_Close(ftdih);

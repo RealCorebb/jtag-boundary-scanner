@@ -861,6 +861,12 @@ loadliberror:
 
 int drv_FTDI_DeInit(jtag_core *jc)
 {
+	FILE *fp = fopen("log.txt", "a");
+    if (fp != NULL)
+    {
+		fprintf(fp, "------------------drv_FTDI_DeInit------------------\n");
+        fclose(fp);
+    }
 	bsi_set_channel(jc, 0, 0); // 不使能 A 通道
 	Sleep(10);
 	bsi_set_channel(jc, 1, 0);

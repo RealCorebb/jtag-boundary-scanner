@@ -842,9 +842,9 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	// 设置电压为 3.3V (对应 DAC 十六进制值 0x0A80)
 	bsi_set_voltage(jc, 0, 0x0A80);  // DAC A -> sends 0x2A80
 	Sleep(10);
-	bsi_set_voltage(jc, 1, 0x0A80);  // DAC B -> sends 0x6A80
+	bsi_set_voltage(jc, 1, 0x0520);  // DAC B
 	Sleep(10);
-	bsi_set_voltage(jc, 2, 0x0A80);  // DAC C -> sends 0xAA80
+	bsi_set_voltage(jc, 2, 0x0520);  // DAC C
 	Sleep(10);
 	bsi_set_voltage(jc, 3, 0x0A80);  // DAC D -> sends 0xEA80
 	Sleep(10);

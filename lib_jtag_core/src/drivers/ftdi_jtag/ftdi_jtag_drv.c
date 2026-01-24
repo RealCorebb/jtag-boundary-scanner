@@ -328,26 +328,12 @@ void update_gpio_state(int index, int state)
 }
 
 
-
-
-// 位反转函数：将 01010101 这种顺序彻底颠倒
-static uint8_t reverse_bits(uint8_t b) {
-    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
-    return b;
-}
-
 /**
  * @brief 发送单个字节并产生 GPIOL0 (ADBUS4) 上升沿触发信号
  */
 static void bsi_send_byte_with_trigger(jtag_core *jc, uint8_t byte)
 {
     // 1. 将 8bit 数据输出到 ACBUS (GPIOH0-7)
-
-	//翻转
-	//uint8_t reversed_byte = reverse_bits(byte);
-    //high_output = reversed_byte;
 
 	// 2. 产生 GPIOL0 (ADBUS4) 的上升沿
     // 先拉低触发引脚 (ADBUS4 对应 bit 4)
@@ -673,23 +659,13 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	ACBUS3 -> RED LED;                   (GPIOH3)
 	*/
 
-	low_direction = 0xFB;
+	low_direction = 0x00;
  	for (i = 0; i < 8; i++)
 	{
 		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DIR_ADBUS%d", i);
 		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
 		{
 			low_direction |= (0x01 << i);
-		}
-	}
-
-	low_output = 0x00;
-	for (i = 0; i < 8; i++)
-	{
-		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DEFAULT_STATE_ADBUS%d", i);
-		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
-		{
-			low_output |= (0x01 << i);
 		}
 	}
 
@@ -710,16 +686,6 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
 		{
 			high_direction |= (0x01 << i);
-		}
-	}
-
-	high_output = 0x00;
-	for (i = 0; i < 8; i++)
-	{
-		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DEFAULT_STATE_ACBUS%d", i);
-		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
-		{
-			high_output |= (0x01 << i);
 		}
 	}
 
@@ -827,6 +793,27 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	bsi_set_channel(jc, 0, 1); // 使能 A 通道
 	Sleep(1);
 	bsi_set_channel(jc, 1, 1);
+
+	low_output = 0x00;
+	for (i = 0; i < 8; i++)
+	{
+		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DEFAULT_STATE_ADBUS%d", i);
+		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
+		{
+			low_output |= (0x01 << i);
+		}
+	}
+
+	high_output = 0x00;
+	for (i = 0; i < 8; i++)
+	{
+		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DEFAULT_STATE_ACBUS%d", i);
+		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
+		{
+			high_output |= (0x01 << i);
+		}
+	}
+
 	return 0;
 
 loadliberror:

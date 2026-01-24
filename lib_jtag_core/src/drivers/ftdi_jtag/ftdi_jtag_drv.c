@@ -861,12 +861,12 @@ loadliberror:
 
 int drv_FTDI_DeInit(jtag_core *jc)
 {
-	pFT_Close(ftdih);
-	FreeLibrary(lib_handle);
-	lib_handle = NULL;
 	bsi_set_channel(jc, 0, 1); // 不使能 A 通道
 	Sleep(10);
 	bsi_set_channel(jc, 1, 0);
+	pFT_Close(ftdih);
+	FreeLibrary(lib_handle);
+	lib_handle = NULL;
 	return 0;
 }
 

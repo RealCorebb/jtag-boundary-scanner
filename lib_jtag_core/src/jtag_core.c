@@ -1096,6 +1096,11 @@ void jtagcore_deinit(jtag_core *jc)
     }
 	if (jc)
 	{
+		if (jc->io_functions.drv_DeInit)
+		{
+			jc->io_functions.drv_DeInit(jc);
+			memset(&jc->io_functions, 0, sizeof(drv_ptr));
+		}
 		deinitEnv((envvar_entry *)jc->envvar);
 		free(jc);
 	}

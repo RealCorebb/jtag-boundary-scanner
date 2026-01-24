@@ -674,14 +674,14 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	*/
 
 	low_direction = 0xFB;
-/* 	for (i = 0; i < 8; i++)
+ 	for (i = 0; i < 8; i++)
 	{
 		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DIR_ADBUS%d", i);
 		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
 		{
 			low_direction |= (0x01 << i);
 		}
-	} */
+	}
 
 	low_output = 0x00;
 	for (i = 0; i < 8; i++)
@@ -703,15 +703,15 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 		}
 	}
 
-	high_direction = 0xFF;
-/* 	for (i = 0; i < 8; i++)
+	high_direction = 0x00;
+ 	for (i = 0; i < 8; i++)
 	{
 		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DIR_ACBUS%d", i);
 		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
 		{
 			high_direction |= (0x01 << i);
 		}
-	} */
+	}
 
 	high_output = 0x00;
 	for (i = 0; i < 8; i++)

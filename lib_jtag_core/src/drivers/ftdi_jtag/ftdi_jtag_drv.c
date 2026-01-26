@@ -340,12 +340,12 @@ static void bsi_send_byte_with_trigger(jtag_core *jc, uint8_t byte)
 	update_gpio_state(4, 0);
     ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
 
-	Sleep(10);
+	Sleep(1);
 	
 	high_output = byte;
     ft2232_set_data_bits_high_byte(high_output, high_direction);
 
-	Sleep(10);
+	Sleep(1);
 
 
     // 再拉高触发引脚，产生上升沿使 CPLD 采样数据
@@ -360,10 +360,10 @@ static void bsi_send_frame(jtag_core *jc, uint8_t cmd, uint8_t d1, uint8_t d2, u
 {
 	update_gpio_state(4, 1);
     ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
-	Sleep(10);
+	Sleep(1);
 	update_gpio_state(5, 0);
 	ft2232_set_data_bits_low_byte(low_output, low_direction);
-	Sleep(10);
+	Sleep(1);
     uint8_t frame[8];
     
     frame[0] = 0x55; // 起始帧 
@@ -381,10 +381,10 @@ static void bsi_send_frame(jtag_core *jc, uint8_t cmd, uint8_t d1, uint8_t d2, u
     {
         bsi_send_byte_with_trigger(jc, frame[i]);
     }
-	Sleep(10);
+	Sleep(1);
 	update_gpio_state(4, 0);
     ft2232_set_data_bits_low_byte((unsigned char)(low_output ^ low_polarity), low_direction);
-	Sleep(10);
+	Sleep(1);
 	update_gpio_state(5, 1);
 	ft2232_set_data_bits_low_byte(low_output, low_direction);
 }
@@ -659,15 +659,15 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 	ACBUS3 -> RED LED;                   (GPIOH3)
 	*/
 
-	low_direction = 0x00;
- 	for (i = 0; i < 8; i++)
+	low_direction = 0xFB;
+/*  	for (i = 0; i < 8; i++)
 	{
 		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DIR_ADBUS%d", i);
 		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
 		{
 			low_direction |= (0x01 << i);
 		}
-	}
+	} */
 
 	low_polarity = 0;
 	for (i = 0; i < 8; i++)
@@ -679,8 +679,8 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 		}
 	}
 
-	high_direction = 0x00;
- 	for (i = 0; i < 8; i++)
+	high_direction = 0xFF;
+/*  	for (i = 0; i < 8; i++)
 	{
 		sprintf(tmp_str, "PROBE_FTDI_SET_PIN_DIR_ACBUS%d", i);
 		if (jtagcore_getEnvVarValue(jc, tmp_str) > 0)
@@ -688,7 +688,7 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 			high_direction |= (0x01 << i);
 		}
 	}
-
+ */
 	high_polarity = 0x00;
 	for (i = 0; i < 8; i++)
 	{
@@ -778,20 +778,20 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 
 	jtagcore_logs_printf(jc, MSG_INFO_0, "drv_FTDI_Init : Probe Driver loaded successfully...\r\n");
 
-	Sleep(10);
+	Sleep(1);
 	bsi_reset(jc);
-	Sleep(10);
+	Sleep(1);
 	// 设置电压为 3.3V (对应 DAC 十六进制值 0x0A80)
 	bsi_set_voltage(jc, 0, 0x0A80);  // DAC A -> sends 0x2A80
-	Sleep(10);
+	Sleep(1);
 	bsi_set_voltage(jc, 1, 0x0520);  // DAC B
-	Sleep(10);
+	Sleep(1);
 	bsi_set_voltage(jc, 2, 0x0520);  // DAC C
-	Sleep(10);
+	Sleep(1);
 	bsi_set_voltage(jc, 3, 0x0A80);  // DAC D -> sends 0xEA80
-	Sleep(10);
+	Sleep(1);
 	bsi_set_channel(jc, 0, 1); // 使能 A 通道
-	Sleep(10);
+	Sleep(1);
 	bsi_set_channel(jc, 1, 1);
 
 	low_output = 0x00;
@@ -828,7 +828,7 @@ loadliberror:
 int drv_FTDI_DeInit(jtag_core *jc)
 {
 	bsi_set_channel(jc, 0, 0); // 不使能 A 通道
-	Sleep(10);
+	Sleep(1);
 	bsi_set_channel(jc, 1, 0);
 	pFT_Close(ftdih);
 	FreeLibrary(lib_handle);

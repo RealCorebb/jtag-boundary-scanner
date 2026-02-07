@@ -173,6 +173,8 @@ int jtagcore_set_pin_state(jtag_core * jc, int device, int pin, int type, int st
 // "scan_mode" should be set to JTAG_CORE_SAMPLE_SCANMODE (observation only) or JTAG_CORE_EXTEST_SCANMODE (full pin control)
 int jtagcore_set_scan_mode(jtag_core * jc, int device, int scan_mode);
 
+int jtagcore_get_scan_mode(jtag_core *jc, int device);
+
 // JTAG Scan mode
 #define JTAG_CORE_SAMPLE_SCANMODE  0x00
 #define JTAG_CORE_EXTEST_SCANMODE  0x01

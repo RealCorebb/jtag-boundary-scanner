@@ -709,6 +709,124 @@ int jtagcore_set_scan_mode(jtag_core *jc, int device, int scan_mode)
 	return ret;
 }
 
+int jtagcore_get_scan_mode(jtag_core *jc, int device)
+{
+	unsigned char buf_out[128];
+	unsigned char buf_in[128];
+	int d, i, irlen;
+	jtag_bsdl *bsdl;
+	char ir_value[128];
+	int matched_mode;
+
+	if (!jc || device < 0 || device >= jc->nb_of_devices_in_chain || device >= MAX_NB_JTAG_DEVICE)
+	{
+		return JTAG_CORE_BAD_PARAMETER;
+	}
+
+	if (!jc->io_functions.drv_TX_TMS)
+	{
+		return JTAG_CORE_NO_PROBE;
+	}
+
+	bsdl = jc->devices_list[device].bsdl;
+	if (!bsdl)
+	{
+		return JTAG_CORE_BAD_PARAMETER;
+	}
+
+	// Go to Shift-IR state
+	buf_out[0] = 0x00;
+	buf_out[1] = JTAG_STR_TMS;
+	buf_out[2] = JTAG_STR_TMS;
+	buf_out[3] = 0x00;
+	buf_out[4] = 0x00;
+	jc->io_functions.drv_TX_TMS(jc, (unsigned char *)&buf_out, 5);
+
+	// Shift through all devices in the chain before our target device
+	memset(buf_out, 0x00, sizeof(buf_out));
+	for (d = 0; d < device; d++)
+	{
+		if (jc->devices_list[d].bsdl)
+		{
+			irlen = jc->devices_list[d].bsdl->number_of_bits_per_instruction;
+		}
+		else
+		{
+			// Assume bypass length
+			irlen = 3;
+		}
+		jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, (unsigned char *)&buf_in, irlen);
+	}
+
+	// Read the IR of the target device
+	memset(buf_in, 0, sizeof(buf_in));
+	
+	if (device == (jc->nb_of_devices_in_chain - 1)) // Last device in chain?
+	{
+		jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, (unsigned char *)&buf_in, bsdl->number_of_bits_per_instruction - 1);
+		buf_out[0] = JTAG_STR_TMS; // Exit on last bit
+		jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, &buf_in[bsdl->number_of_bits_per_instruction - 1], 1);
+	}
+	else
+	{
+		jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, (unsigned char *)&buf_in, bsdl->number_of_bits_per_instruction);
+		
+		// Shift through remaining devices
+		for (d = device + 1; d < jc->nb_of_devices_in_chain; d++)
+		{
+			if (jc->devices_list[d].bsdl)
+			{
+				irlen = jc->devices_list[d].bsdl->number_of_bits_per_instruction;
+			}
+			else
+			{
+				irlen = 3;
+			}
+			
+			if (d == (jc->nb_of_devices_in_chain - 1))
+			{
+				jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, (unsigned char *)&buf_in, irlen - 1);
+				buf_out[0] = JTAG_STR_TMS;
+				jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, (unsigned char *)&buf_in, 1);
+			}
+			else
+			{
+				jc->io_functions.drv_TXRX_DATA(jc, (unsigned char *)&buf_out, (unsigned char *)&buf_in, irlen);
+			}
+		}
+	}
+
+	// Convert the read IR bits to string (LSB first, reverse for comparison)
+	for (i = 0; i < bsdl->number_of_bits_per_instruction; i++)
+	{
+		ir_value[(bsdl->number_of_bits_per_instruction - 1) - i] = buf_in[i] ? '1' : '0';
+	}
+	ir_value[bsdl->number_of_bits_per_instruction] = '\0';
+
+	// Compare with SAMPLE and EXTEST instructions
+	matched_mode = JTAG_CORE_BAD_PARAMETER;
+	
+	if (strncmp(ir_value, bsdl->SAMPLE_Instruction, bsdl->number_of_bits_per_instruction) == 0)
+	{
+		matched_mode = JTAG_CORE_SAMPLE_SCANMODE;
+	}
+	else if (strncmp(ir_value, bsdl->EXTEST_Instruction, bsdl->number_of_bits_per_instruction) == 0)
+	{
+		matched_mode = JTAG_CORE_EXTEST_SCANMODE;
+	}
+
+	// Return to Idle state
+	buf_out[0] = JTAG_STR_TMS;
+	buf_out[1] = 0x00;
+	buf_out[2] = 0x00;
+	buf_out[3] = 0x00;
+	buf_out[4] = 0x00;
+	buf_out[5] = 0x00;
+	jc->io_functions.drv_TX_TMS(jc, (unsigned char *)&buf_out, 6);
+
+	return matched_mode;
+}
+
 int jtagcore_push_and_pop_chain(jtag_core *jc, int mode)
 {
 	unsigned char buf_out[128];

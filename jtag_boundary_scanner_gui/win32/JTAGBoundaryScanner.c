@@ -1,4 +1,4 @@
-/*
+Ôªø/*
  * JTAG Boundary Scanner
  * Copyright (c) 2008 - 2024 Viveris Technologies
  *
@@ -20,7 +20,7 @@
 /**
 * @file   JTAGBoundaryScanner.c
 * @brief  Win32 GUI
-* @author Jean-FranÁois DEL NERO <Jean-Francois.DELNERO@viveris.fr>
+* @author Jean-FranÈèæis DEL NERO <Jean-Francois.DELNERO@viveris.fr>
 */
 
 #include "resource.h"
@@ -111,6 +111,8 @@ void AppendText(HWND hEditWnd, LPCTSTR Text)
     SendMessage(hEditWnd, EM_REPLACESEL, 0, (LPARAM)Text);
 }
 
+#define FORCE_LOG_TO_FILE 1
+
 void logs_callback(jtag_core * jc, const char * string)
 {
 	char * path;
@@ -122,8 +124,16 @@ void logs_callback(jtag_core * jc, const char * string)
 	if(hDlg_logs)
 		AppendText(GetDlgItem(hDlg_logs, IDC_EDIT1), string);
 
+#if FORCE_LOG_TO_FILE
+	f = fopen("jtag_debug_log.txt", "a");
+	if(f)
+	{
+		fprintf(f, "%s", string);
+		fclose(f);
+	}
+#else
 	path = jtagcore_get_logs_file( jc );
-	if( strlen(path) )
+	if( path && strlen(path) )
 	{
 		f = fopen(path, "a");
 		if(f)
@@ -132,6 +142,7 @@ void logs_callback(jtag_core * jc, const char * string)
 			fclose(f);
 		}
 	}
+#endif
 }
 
 int APIENTRY WinMain(HINSTANCE hInstance,
@@ -723,7 +734,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			switch (wmEvent)
 			{
 
-				case BN_CLICKED: //-> une check box a ÈtÈ modifiÈe
+				case BN_CLICKED: //-> une check box a Èñ†?modifiÈñë
 					if ((wmId >= BASE_CHECKBOX_ID) && (wmId < (jtagcore_get_number_of_pins(jc, last_selected_dev_index) * 4) + BASE_CHECKBOX_ID))
 					{
 						////////////////////////////////////////////////////////////////////////////////////////
@@ -1186,7 +1197,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				if (hPen)
 				{
 					SelectObject(hdc, hPen);
-					// lignes de sÈparations
+					// lignes de sÈñúarations
 					for (i = 0; i < graph_pin_list.NbCol; i++)
 					{
 						MoveToEx(hdc, 0 + (i*graph_pin_list.NbPixPerCol) + graph_pin_list.NbPixPerPinName + (NB_PIX_PER_CHECKBOX_H*NB_CHECKBOX), 0, NULL);
@@ -1282,7 +1293,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					MessageBox(hWnd, "JTAG chain error !", "Error", MB_OK | MB_ICONERROR);
 				}
 
-				// recuperation des etat d''entrÈe et mise ‡ jour des checkbox.
+				// recuperation des etat d''entrÈñë et mise ?jour des checkbox.
 				i=0;
 				while (i<c)
 				{

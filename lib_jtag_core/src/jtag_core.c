@@ -157,6 +157,7 @@ int jtagcore_scan_and_init_chain(jtag_core *jc)
 		}
 
 		jc->total_IR_lenght = i;
+		jtagcore_logs_printf(jc, MSG_INFO_0, "Total IR length: %d\r\n", jc->total_IR_lenght);
 
 		// Send the bypass instruction to all devices
 		for (i = 0; i < sizeof(buf_out); i++)

@@ -298,6 +298,7 @@ int drv_FTDI_Detect(jtag_core *jc)
 			}
 
 			strcat(subdrv_list[validDevs].drv_desc, SerialNumber);
+			subdrv_list[validDevs].ftdi_index = i;
 
 			validDevs++; // Increment only for successfully detected devices
 		}
@@ -553,7 +554,13 @@ int drv_FTDI_Init(jtag_core *jc, int sub_drv, char *params)
 		goto loadliberror;
 	}
 
-	devIndex = sub_drv;
+	if (sub_drv < 0 || sub_drv >= MAX_PROBES_FTDI)
+	{
+		jtagcore_logs_printf(jc, MSG_ERROR, "drv_FTDI_Init : Invalid sub_drv %d !\r\n", sub_drv);
+		goto loadliberror;
+	}
+
+	devIndex = subdrv_list[sub_drv].ftdi_index;
 	status = pFT_ListDevices((LPVOID)(MACH_WORD)devIndex, SerialNumber, FT_LIST_BY_INDEX | FT_OPEN_BY_SERIAL_NUMBER);
 	if (status != FT_OK)
 	{
